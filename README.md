@@ -8,6 +8,7 @@ This project is a finance job scraper built with Node.js, designed to extract jo
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [API Routes](#api-routes)
   - [Project Structure](#project-structure)
   - [Configuration](#configuration)
   - [Logging](#logging)
@@ -18,7 +19,7 @@ This project is a finance job scraper built with Node.js, designed to extract jo
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/finance-job-scraper.git
+   git clone https://github.com/louisxie0830/finance-job-scraper.git
    ```
 
 2. Navigate to the project directory:
@@ -39,6 +40,15 @@ This project is a finance job scraper built with Node.js, designed to extract jo
    ```
 
 2. The application will begin scraping job listings and log the results.
+
+## API Routes
+
+The following API routes are available in the application, providing job listings for different banks:
+
+- `GET /taishin/jobs` - Retrieve job listings from Taishin Bank
+- `GET /cathaybk/jobs` - Retrieve job listings from Cathay United Bank
+- `GET /esunfhc/jobs` - Retrieve job listings from E.SUN FHC
+- `GET /sinopac/jobs` - Retrieve job listings from SinoPac Holdings
 
 ## Project Structure
 

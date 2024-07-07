@@ -1,19 +1,29 @@
 {
   "name": "finance-job-scraper",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Node.js application for scraping job listings from finance-related job portals.",
   "type": "module",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "run-prod": "pm2-runtime start ecosystem.config.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "finance",
+    "job scraper",
+    "web scraping",
+    "Node.js"
+  ],
+  "author": "Louis Xie",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/louisxie0830/finance-job-scraper.git"
+  },
   "dependencies": {
     "axios": "^1.7.2",
     "axios-retry": "^4.4.1",

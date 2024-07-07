@@ -85,9 +85,7 @@ const jobs = async (req, res) => {
         if (applFormNo) {
           const data = await fetchJobDetail(applFormNo);
           const $ = cheerioLoad(data);
-          job.description = cleanString(
-            cleanString($('.wp-break').text().trim()),
-          );
+          job.description = cleanString($('.wp-break').text().trim());
         }
         return job;
       }),

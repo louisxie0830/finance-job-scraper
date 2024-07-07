@@ -40,7 +40,7 @@ app.use(limiter);
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Image conversion Service!');
+  res.send('Welcome to the finance-job-scraper service!');
 });
 
 app.get('/taishin/jobs', taishinJobs);

@@ -14,6 +14,9 @@ import esunfhcJobs from './routes/esunfhc/jobs.js';
 import sinopacJobs from './routes/sinopac/jobs.js';
 
 const app = express();
+
+app.set('trust proxy', true);
+
 const port = 3000;
 
 app.use(hpp());

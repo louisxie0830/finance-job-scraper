@@ -27,7 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
-RUN npx puppeteer browsers install chrome
+
+RUN npm puppeteer browsers install chrome -g
 
 # Copy only necessary files
 COPY --from=builder /workspace/node_modules node_modules/

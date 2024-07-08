@@ -95,9 +95,9 @@ RUN chmod +x start.sh
 USER root
 
 EXPOSE 3000
-EXPOSE 443
-EXPOSE 80
-EXPOSE 49152-65535/udp
+# EXPOSE 443
+# EXPOSE 80
+# EXPOSE 49152-65535/udp
 
 
 # CMD ["npm", "run", "run-prod"]

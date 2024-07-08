@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import PQueue from 'p-queue';
 
-const queue = new PQueue({ concurrency: 1 });
+const queue = new PQueue({ concurrency: 5 });
 
 const puppeteerLoader = async (url) => {
   let browser;
@@ -10,7 +10,7 @@ const puppeteerLoader = async (url) => {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       dumpio: true,
-      // timeout: 60000,
+      timeout: 60000,
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });

@@ -23,6 +23,7 @@ const processData = async () => {
   });
 
   if (jobs.length === 0) throw new Error('No valid job data found.');
+  console.log('jobs: ', jobs);
 
   jobs = await Promise.all(
     jobs.map(async (job) => {

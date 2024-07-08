@@ -23,12 +23,41 @@ WORKDIR /workspace
 
 # Only install necessary runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libvips && \
+    libvips \
+    gconf-service \
+    libasound2 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgconf-2-4 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxtst6 \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator1 \
+    lsb-release \
+    xdg-utils \
+    wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 
-RUN npm puppeteer browsers install chrome -g
+# Install Puppeteer
+RUN npm install puppeteer@22.12.1
+
+# Install Chrome
+RUN npx puppeteer browsers install chrome
 
 # Copy only necessary files
 COPY --from=builder /workspace/node_modules node_modules/

@@ -58,3 +58,4 @@
 2024-07-08T12:53:53.785Z [[32minfo[39m]: GET /favicon.ico 404 150 - 5.504 ms
 2024-07-08T13:02:44.947Z [[32minfo[39m]: GET /favicon.ico 404 150 - 7.924 ms
 2024-07-08T13:05:51.834Z [[32minfo[39m]: GET /sinopac/jobs - - - - ms
+2024-07-08T13:10:40.559Z [[32minfo[39m]: GET /sinopac/jobs 200 - - 199072.932 ms

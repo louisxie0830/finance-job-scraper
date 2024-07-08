@@ -3,10 +3,6 @@ services:
     build: .
     ports:
       - "3000:3000"
-      - "36978:36978/udp"
-      - "47295:47295/udp"
-      - "35846:35846/udp"
-      - "36562:36562/udp"
-      - "54328:54328/udp"
+      - "49152-65535:49152-65535/udp"
     environment:
       NODE_ENV: production

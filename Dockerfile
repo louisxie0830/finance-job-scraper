@@ -84,12 +84,7 @@ COPY ./combined.log .
 COPY ./combined.log ./src/
 
 EXPOSE 3000
+EXPOSE 49152-65535/udp
 
-# udp port
-EXPOSE 36978/udp
-EXPOSE 47295/udp
-EXPOSE 35846/udp
-EXPOSE 36562/udp
-EXPOSE 54328/udp
 
 CMD ["npm", "run", "run-prod"]

@@ -52,3 +52,9 @@
 2024-07-07T14:09:26.191Z [[32minfo[39m]: GET /cathaybk/jobs - - - - ms
 2024-07-07T14:09:39.667Z [[32minfo[39m]: GET /cathaybk/jobs 200 - - 13419.232 ms
 2024-07-07T14:09:51.186Z [[32minfo[39m]: GET /cathaybk/jobs 304 - - 11552.800 ms
+2024-07-08T10:22:28.680Z [[32minfo[39m]: GET /esunfhc/jobs 200 - - 1177.708 ms
+2024-07-08T10:22:28.903Z [[32minfo[39m]: GET /favicon.ico 404 150 - 1.562 ms
+2024-07-08T12:53:53.493Z [[32minfo[39m]: GET /sinopac/jobs 500 125 - 121807.801 ms
+2024-07-08T12:53:53.785Z [[32minfo[39m]: GET /favicon.ico 404 150 - 5.504 ms
+2024-07-08T13:02:44.947Z [[32minfo[39m]: GET /favicon.ico 404 150 - 7.924 ms
+2024-07-08T13:05:51.834Z [[32minfo[39m]: GET /sinopac/jobs - - - - ms

@@ -20,15 +20,22 @@ RUN npm ci
 FROM node:20-slim
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y wget gnupg xvfb \
+    && apt-get install -y \
     libvips \
     gconf-service \
     libasound2 \
     libatk1.0-0 \
     libcups2 \
     libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libpango-1.0-0 \
+    libgcc1 \
     libdrm2 \
     libgconf-2-4 \
+    libgdk-pixbuf2.0-0 \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
@@ -47,7 +54,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libappindicator1 \
     lsb-release \
     xdg-utils \
-    wget \
     libxshmfence1 \
     libgbm1 \
     libpango1.0-0 \

@@ -72,8 +72,6 @@ COPY --from=builder /workspace/node_modules ./node_modules/
 COPY ./ecosystem.config.cjs .
 COPY ./package.json .
 COPY ./src ./src/
-COPY ./error.log ./src/
-COPY ./error.log .
 COPY ./combined.log .
 COPY ./combined.log ./src/
 

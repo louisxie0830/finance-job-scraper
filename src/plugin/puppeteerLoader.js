@@ -4,8 +4,9 @@ import PQueue from 'p-queue';
 const queue = new PQueue({ concurrency: 5 });
 
 const puppeteerLoader = async (url) => {
+  let browser;
   try {
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });

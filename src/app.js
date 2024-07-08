@@ -1,5 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import { IpFilter } from 'express-ipfilter';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -21,6 +22,7 @@ const port = 3000;
 
 app.use(hpp());
 app.use(helmet());
+app.use(IpFilter(['127.0.0.1', '::1'], { mode: 'allow' }));
 
 app.use(compression());
 

@@ -3,7 +3,6 @@ import cheerioLoad from '../../plugin/cheerioLoader.js';
 
 const BASE_URL = 'https://bankrecruit.sinopac.com';
 const jobSearch = `${BASE_URL}/jobSearch/`;
-const jobDetail = `${BASE_URL}/jobDetail/?jobId=JOB0000222`;
 
 const processData = async () => {
   const data = await puppeteerLoader(jobSearch);

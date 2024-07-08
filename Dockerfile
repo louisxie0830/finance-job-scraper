@@ -3,7 +3,6 @@ FROM node:20-slim as builder
 
 WORKDIR /workspace
 
-# 结合更新、安装和清理以减少层大小并确保所有操作在一层中完成
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3 \
@@ -17,11 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# 使用 node slim 以确保仅安装必要的软件包
+
 FROM node:20-slim
 WORKDIR /workspace
 
-# 安装必要的运行时依赖项，包括 libdbus-1-3 和 libdrm2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libvips \
     gconf-service \
@@ -57,15 +55,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxkbcommon0 \
     libxshmfence-dev \
     libgbm-dev \
-    && apt-get clean && \
+    libglib2.0-0 \
+    libnss3-dev \
+    libatk-bridge2.0-0 \
+    libx11-xcb-dev \
+    libxcomposite-dev \
+    libxcursor-dev \
+    libxdamage-dev \
+    libxext-dev \
+    libxi-dev \
+    libxrandr-dev \
+    libxtst-dev \
+    --no-install-recommends && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 
-# 安装 Puppeteer
 RUN npm install puppeteer@22.12.1
+RUN npx @puppeteer/browsers install chrome@stable
 
-# 安装 Chrome
-RUN npx puppeteer browsers install chrome
 
 # 复制必要的文件
 COPY --from=builder /workspace/node_modules ./node_modules/

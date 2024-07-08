@@ -9,6 +9,7 @@ const puppeteerLoader = async (url) => {
     browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      timeout: 60000,
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
@@ -17,7 +18,7 @@ const puppeteerLoader = async (url) => {
   } catch (error) {
     throw new Error(`Error during navigation: ${error}`);
   } finally {
-    await browser.close();
+    if (browser) await browser.close();
   }
 };
 

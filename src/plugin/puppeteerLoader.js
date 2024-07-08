@@ -15,7 +15,7 @@ const puppeteerLoader = async (url) => {
     const content = await page.content();
     return content;
   } catch (error) {
-    console.error('Error during navigation:', error);
+    throw new Error(`Error during navigation: ${error}`);
   } finally {
     await browser.close();
   }

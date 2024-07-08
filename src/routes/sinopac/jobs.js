@@ -31,7 +31,11 @@ const processData = async () => {
 
       if (link) {
         const data = await puppeteerLoader(link);
+        if (data && typeof data !== 'string')
+          throw new Error('Failed to load HTML content.');
+
         const $ = cheerioLoad(data);
+
         job.description =
           $(
             'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600',

@@ -1,4 +1,4 @@
-import os from 'os';
+const os = require('os');
 
 const totalMemoryGB = Math.floor(os.totalmem() / 1024 / 1024 / 1024);
 

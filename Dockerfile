@@ -79,10 +79,7 @@ RUN apt-get update \
 RUN npm install puppeteer@22.12.1
 RUN npx @puppeteer/browsers install chrome@stable
 
-USER root
 
-RUN dbus-uuidgen > /etc/machine-id
-RUN service dbus start
 
 
 COPY --from=builder /workspace/node_modules ./node_modules/
@@ -91,6 +88,11 @@ COPY ./package.json .
 COPY ./src ./src/
 COPY ./combined.log .
 COPY ./combined.log ./src/
+COPY ./start.sh ./
+
+RUN chmod +x start.sh
+
+USER root
 
 EXPOSE 3000
 EXPOSE 443
@@ -99,4 +101,4 @@ EXPOSE 49152-65535/udp
 
 
 # CMD ["npm", "run", "run-prod"]
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & npm run run-prod"]
+CMD ["./start.sh"]

@@ -1,9 +1,9 @@
-# Use a more focused base image
+# 使用更专注的基础映像
 FROM node:20-slim as builder
 
 WORKDIR /workspace
 
-# Combine update, install and cleanup to reduce layer size and ensure all actions are in one layer
+# 结合更新、安装和清理以减少层大小并确保所有操作在一层中完成
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3 \
@@ -17,11 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Using node slim again to ensure only necessary packages are installed
+# 使用 node slim 以确保仅安装必要的软件包
 FROM node:20-slim
 WORKDIR /workspace
 
-# Only install necessary runtime dependencies
+# 安装必要的运行时依赖项，包括 libdbus-1-3 和 libdrm2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libvips \
     gconf-service \
@@ -61,22 +61,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 
-# Install Puppeteer
+# 安装 Puppeteer
 RUN npm install puppeteer@22.12.1
 
-# Install Chrome
+# 安装 Chrome
 RUN npx puppeteer browsers install chrome
 
-# Copy only necessary files
-COPY --from=builder /workspace/node_modules node_modules/
+# 复制必要的文件
+COPY --from=builder /workspace/node_modules ./node_modules/
 COPY ./ecosystem.config.cjs .
 COPY ./package.json .
-COPY ./src src/
-COPY ./error.log src/
+COPY ./src ./src/
+COPY ./error.log ./src/
 COPY ./error.log .
 COPY ./combined.log .
-COPY ./combined.log src/
+COPY ./combined.log ./src/
 
 EXPOSE 3000
+
+# udp port
+EXPOSE 36978/udp
+EXPOSE 47295/udp
+EXPOSE 35846/udp
+EXPOSE 36562/udp
+EXPOSE 54328/udp
 
 CMD ["npm", "run", "run-prod"]

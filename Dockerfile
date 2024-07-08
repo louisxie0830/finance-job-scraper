@@ -1,4 +1,3 @@
-# 使用更专注的基础映像
 FROM node:20-slim as builder
 
 WORKDIR /workspace
@@ -21,7 +20,7 @@ FROM node:20-slim
 WORKDIR /workspace
 
 RUN apt-get update \
-    && apt-get install -y wget gnupg xvfb \
+    && apt-get install -y wget gnupg xvfb dbus-x11 \
     && apt-get install -y \
     libvips \
     gconf-service \
@@ -80,8 +79,12 @@ RUN apt-get update \
 RUN npm install puppeteer@22.12.1
 RUN npx @puppeteer/browsers install chrome@stable
 
+USER root
 
-# 复制必要的文件
+RUN dbus-uuidgen > /etc/machine-id
+RUN service dbus start
+
+
 COPY --from=builder /workspace/node_modules ./node_modules/
 COPY ./ecosystem.config.cjs .
 COPY ./package.json .

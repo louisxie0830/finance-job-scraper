@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libatk1.0-0 \
     libcups2 \
     libdbus-1-3 \
+    libdrm2 \
     libgconf-2-4 \
     libgtk-3-0 \
     libnspr4 \

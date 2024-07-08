@@ -49,8 +49,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libappindicator1 \
     lsb-release \
     xdg-utils \
-    wget && \
-    apt-get clean && \
+    wget \
+    libxshmfence1 \
+    libgbm1 \
+    libpango1.0-0 \
+    libcairo2 \
+    libxkbcommon0 \
+    libxshmfence-dev \
+    libgbm-dev \
+    && apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 

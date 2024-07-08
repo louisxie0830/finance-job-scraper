@@ -98,4 +98,5 @@ EXPOSE 80
 EXPOSE 49152-65535/udp
 
 
-CMD ["npm", "run", "run-prod"]
+# CMD ["npm", "run", "run-prod"]
+CMD ["xvfb-run", "--server-args='-screen 0 1024x768x24'", "npm", "run", "run-prod"]

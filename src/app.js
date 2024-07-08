@@ -16,7 +16,7 @@ import sinopacJobs from './routes/sinopac/jobs.js';
 
 const app = express();
 
-app.set('trust proxy', true);
+app.set('trust proxy', ['127.0.0.1', '::1']);
 
 const port = 3000;
 

@@ -4,6 +4,7 @@ import PQueue from 'p-queue';
 const queue = new PQueue({ concurrency: 5 });
 
 const puppeteerLoader = async (url) => {
+  console.log('url: ', url);
   let browser;
   try {
     browser = await puppeteer.launch({

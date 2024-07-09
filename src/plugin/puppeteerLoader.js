@@ -14,12 +14,15 @@ const puppeteerLoader = async (url) => {
     });
 
     const page = await browser.newPage();
+    console.log('page: ', page);
     const response = await page.goto(url, { waitUntil: 'networkidle2' });
+    console.log('response: ', response);
     if (response.status() === 302) {
       await page.waitForNavigation();
     }
 
     const content = await page.content();
+    console.log('content: ', content);
     if (content && typeof content !== 'string')
       throw new Error('Failed to load HTML content.');
 

@@ -40,6 +40,8 @@ const processData = async () => {
         .next()
         .text()
         .trim() || null;
+
+    console.log('job: ', job);
   });
 
   return jobs;

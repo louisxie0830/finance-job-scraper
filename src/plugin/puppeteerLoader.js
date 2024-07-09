@@ -3,8 +3,9 @@ import PQueue from 'p-queue';
 
 const queue = new PQueue({ concurrency: 5 });
 
+const puppeteer = require('puppeteer');
+
 const puppeteerLoader = async (url) => {
-  console.log('url: ', url);
   let browser;
   try {
     browser = await puppeteer.launch({
@@ -15,23 +16,31 @@ const puppeteerLoader = async (url) => {
     });
 
     const page = await browser.newPage();
-    console.log('page: ', page);
     const response = await page.goto(url, { waitUntil: 'networkidle2' });
-    console.log('response: ', response);
+
     if (response.status() === 302) {
-      await page.waitForNavigation();
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
     }
 
     const content = await page.content();
-    console.log('content: ', content);
-    if (content && typeof content !== 'string')
-      throw new Error('Failed to load HTML content.');
 
+    if (!content || typeof content !== 'string') {
+      throw new Error('Failed to load HTML content.');
+    }
+
+    await browser.close();
     return content;
   } catch (error) {
-    throw new Error(`Error during navigation: ${error}`);
+    console.error(`Error during navigation: ${error}`);
+    throw error;
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (closeError) {
+        console.error(`Error closing browser: ${closeError}`);
+      }
+    }
   }
 };
 

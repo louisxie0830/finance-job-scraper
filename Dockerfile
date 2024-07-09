@@ -71,13 +71,14 @@ RUN apt-get update \
     libxi-dev \
     libxrandr-dev \
     libxtst-dev \
+    libpangocairo-1.0-0 \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 
 RUN npm install puppeteer@22.12.1
-RUN npx @puppeteer/browsers install chrome@stable
+RUN npx @puppeteer/browsers install chrome
 
 
 

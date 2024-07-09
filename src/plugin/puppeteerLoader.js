@@ -12,12 +12,17 @@ const puppeteerLoader = async (url) => {
       dumpio: true,
       timeout: 60000,
     });
+
     const page = await browser.newPage();
     const response = await page.goto(url, { waitUntil: 'networkidle2' });
     if (response.status() === 302) {
       await page.waitForNavigation();
     }
+
     const content = await page.content();
+    if (content && typeof content !== 'string')
+      throw new Error('Failed to load HTML content.');
+
     return content;
   } catch (error) {
     throw new Error(`Error during navigation: ${error}`);

@@ -7,7 +7,7 @@ module.exports = {
     {
       name: 'finance-job-scraper',
       script: './src/app.js',
-      instances: 'max',
+      instances: '1',
       // exec_mode: 'cluster',
       autorestart: true,
       watch: false,

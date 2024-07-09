@@ -25,36 +25,36 @@ const processData = async () => {
   if (jobs.length === 0) throw new Error('No valid job data found.');
   console.log('jobs: ', jobs);
 
-  jobs = await Promise.all(
-    jobs.map(async (job) => {
-      const { link } = job;
+  // jobs = await Promise.all(
+  //   jobs.map(async (job) => {
+  //     const { link } = job;
 
-      if (link) {
-        const data = await puppeteerLoader(link);
-        if (data && typeof data !== 'string')
-          throw new Error('Failed to load HTML content.');
+  //     if (link) {
+  //       const data = await puppeteerLoader(link);
+  //       if (data && typeof data !== 'string')
+  //         throw new Error('Failed to load HTML content.');
 
-        const $ = cheerioLoad(data);
+  //       const $ = cheerioLoad(data);
 
-        job.description =
-          $(
-            'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600',
-          ).text() || null;
-        job.area =
-          $('h5')
-            .filter((index, element) => {
-              return $(element).text().includes('上班地點');
-            })
-            .next()
-            .text()
-            .trim() || null;
-      }
-      console.log('job: ', job);
-      return job;
-    }),
-  );
+  //       job.description =
+  //         $(
+  //           'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600',
+  //         ).text() || null;
+  //       job.area =
+  //         $('h5')
+  //           .filter((index, element) => {
+  //             return $(element).text().includes('上班地點');
+  //           })
+  //           .next()
+  //           .text()
+  //           .trim() || null;
+  //     }
+  //     console.log('job: ', job);
+  //     return job;
+  //   }),
+  // );
 
-  if (jobs.length === 0) throw new Error('No valid job data found.');
+  // if (jobs.length === 0) throw new Error('No valid job data found.');
 
   return jobs;
 };

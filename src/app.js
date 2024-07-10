@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import hpp from 'hpp';
 import compression from 'compression';
+import timeout from 'express-timeout-handler';
 import errorHandler from './middleware/errorHandler.js';
 import logger from './winstonLogger.js';
 
@@ -44,6 +45,18 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(express.json());
+app.use(
+  timeout.handler({
+    timeout: 120000,
+    onTimeout: (req, res) => {
+      res.status(503).send('Service unavailable. Please retry.');
+    },
+    onDelayedResponse: (req, method, args, requestTime) => {
+      console.log(`Delayed response after ${requestTime}ms`);
+    },
+    disable: ['write', 'setHeaders', 'send', 'json', 'end'],
+  }),
+);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the finance-job-scraper service!');

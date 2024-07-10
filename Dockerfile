@@ -68,8 +68,6 @@ RUN apt-get update \
     rm -rf /var/lib/apt/lists/* && \
     fc-cache -fv
 
-RUN npm install puppeteer@22.12.1
-RUN npx @puppeteer/browsers install chrome
 
 COPY --from=builder /workspace/node_modules ./node_modules/
 COPY ./ecosystem.config.cjs .

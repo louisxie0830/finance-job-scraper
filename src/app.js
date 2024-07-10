@@ -47,7 +47,7 @@ app.use(limiter);
 app.use(express.json());
 app.use(
   timeout.handler({
-    timeout: 120000,
+    timeout: 1200000,
     onTimeout: (req, res) => {
       res.status(503).send('Service unavailable. Please retry.');
     },

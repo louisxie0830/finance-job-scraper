@@ -35,7 +35,6 @@ const puppeteerLoader = async (url) => {
         '--disable-print-preview',
         '--disable-breakpad',
         '--disable-client-side-phishing-detection',
-        '--single-process',
         '--no-zygote',
       ],
       dumpio: true,
@@ -44,13 +43,13 @@ const puppeteerLoader = async (url) => {
 
     const page = await browser.newPage();
     const response = await page.goto(url, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: 60000,
     });
 
     if (response.status() === 302) {
       await page.waitForNavigation({
-        waitUntil: 'networkidle2',
+        waitUntil: 'domcontentloaded',
         timeout: 60000,
       });
     }

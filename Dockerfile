@@ -1,3 +1,4 @@
+# Builder stage
 FROM node:20-slim as builder
 
 WORKDIR /workspace
@@ -15,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json package-lock.json ./
 RUN npm ci
 
-
+# Final stage
 FROM node:20-slim
 WORKDIR /workspace
 
@@ -23,7 +24,7 @@ RUN apt-get update \
     && apt-get install -y wget gnupg xvfb dbus-x11 \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
-    && && apt-get update \
+    && apt-get update \
     && apt-get install -y google-chrome-stable \
     && apt-get install -y \
     libvips \
@@ -62,20 +63,6 @@ RUN apt-get update \
     libpango1.0-0 \
     libcairo2 \
     libxkbcommon0 \
-    libxshmfence-dev \
-    libgbm-dev \
-    libglib2.0-0 \
-    libnss3-dev \
-    libatk-bridge2.0-0 \
-    libx11-xcb-dev \
-    libxcomposite-dev \
-    libxcursor-dev \
-    libxdamage-dev \
-    libxext-dev \
-    libxi-dev \
-    libxrandr-dev \
-    libxtst-dev \
-    libpangocairo-1.0-0 \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -83,9 +70,6 @@ RUN apt-get update \
 
 RUN npm install puppeteer@22.12.1
 RUN npx @puppeteer/browsers install chrome
-
-
-
 
 COPY --from=builder /workspace/node_modules ./node_modules/
 COPY ./ecosystem.config.cjs .
@@ -104,6 +88,4 @@ EXPOSE 3000
 # EXPOSE 80
 # EXPOSE 49152-65535/udp
 
-
-# CMD ["npm", "run", "run-prod"]
 CMD ["./start.sh"]

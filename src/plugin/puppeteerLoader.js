@@ -8,7 +8,33 @@ const puppeteerLoader = async (url) => {
   try {
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins',
+        '--disable-site-isolation-trials',
+        '--enable-features=NetworkService,NetworkServiceInProcess',
+        '--disable-features=site-per-process',
+        '--disable-web-security',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-extensions',
+        '--disable-sync',
+        '--disable-translate',
+        '--metrics-recording-only',
+        '--safebrowsing-disable-auto-update',
+        '--disable-sync-preferences',
+        '--disable-component-update',
+        '--disable-domain-reliability',
+        '--disable-print-preview',
+        '--disable-breakpad',
+        '--disable-client-side-phishing-detection',
+      ],
       dumpio: true,
       timeout: 60000,
     });
@@ -26,7 +52,6 @@ const puppeteerLoader = async (url) => {
       throw new Error('Failed to load HTML content.');
     }
 
-    await browser.close();
     return content;
   } catch (error) {
     console.error(`Error during navigation: ${error}`);
@@ -43,7 +68,12 @@ const puppeteerLoader = async (url) => {
 };
 
 const addTaskToQueue = (url) => {
-  return queue.add(() => puppeteerLoader(url));
+  return queue
+    .add(() => puppeteerLoader(url))
+    .catch((error) => {
+      console.error(`Error processing URL ${url}: ${error}`);
+      throw `Error processing URL ${url}: ${error}`;
+    });
 };
 
 export default addTaskToQueue;

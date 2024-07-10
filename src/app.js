@@ -13,6 +13,7 @@ import taishinJobs from './routes/taishin/jobs.js';
 import cathaybkJobs from './routes/cathaybk/jobs.js';
 import esunfhcJobs from './routes/esunfhc/jobs.js';
 import sinopacJobs from './routes/sinopac/jobs.js';
+import sinopacJobDetail from './routes/sinopac/jobDetail.js';
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.get('/taishin/jobs', taishinJobs);
 app.get('/cathaybk/jobs', cathaybkJobs);
 app.get('/esunfhc/jobs', esunfhcJobs);
 app.get('/sinopac/jobs', sinopacJobs);
+app.get('/sinopac/job/description', sinopacJobDetail);
 
 app.use(errorHandler);
 

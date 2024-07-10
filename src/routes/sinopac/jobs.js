@@ -23,26 +23,6 @@ const processData = async () => {
   });
 
   if (jobs.length === 0) throw new Error('No valid job data found.');
-  console.log('jobs: ', jobs);
-
-  jobs.forEach(async (job) => {
-    const data = await puppeteerLoader(job.link);
-    const $ = cheerioLoad(data);
-    job.description =
-      $(
-        'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600',
-      ).text() || null;
-    job.area =
-      $('h5')
-        .filter((index, element) => {
-          return $(element).text().includes('上班地點');
-        })
-        .next()
-        .text()
-        .trim() || null;
-
-    console.log('job: ', job);
-  });
 
   return jobs;
 };
@@ -52,7 +32,6 @@ const jobs = async (req, res) => {
     const results = await processData();
     res.json(results);
   } catch (error) {
-    console.error(error);
     if (!res.headersSent) {
       res
         .status(500)

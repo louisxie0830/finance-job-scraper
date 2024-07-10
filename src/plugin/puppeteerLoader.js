@@ -35,6 +35,8 @@ const puppeteerLoader = async (url) => {
         '--disable-print-preview',
         '--disable-breakpad',
         '--disable-client-side-phishing-detection',
+        '--single-process',
+        '--no-zygote',
       ],
       dumpio: true,
       timeout: 60000,

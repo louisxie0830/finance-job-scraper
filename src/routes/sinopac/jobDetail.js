@@ -20,6 +20,7 @@ const jobDetail = async (req, res) => {
         .next()
         .text()
         .trim() || null;
+    console.log('job: ', job);
     res.json(job);
   } catch (error) {
     if (!res.headersSent) {

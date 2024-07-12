@@ -43,13 +43,13 @@ const puppeteerLoader = async (url) => {
 
     const page = await browser.newPage();
     const response = await page.goto(url, {
-      waitUntil: 'domcontentloaded',
+      waitUntil: 'networkidle2',
       timeout: 60000,
     });
 
     if (response.status() === 302) {
       await page.waitForNavigation({
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'networkidle2',
         timeout: 60000,
       });
     }

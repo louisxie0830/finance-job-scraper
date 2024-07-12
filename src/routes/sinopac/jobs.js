@@ -22,33 +22,6 @@ const processData = async () => {
     });
   });
 
-  jobs = await Promise.all(
-    jobs.map(async (job) => {
-      const { link } = job;
-
-      if (link) {
-        const data = await puppeteerLoader(link);
-        const $ = cheerioLoad(data);
-
-        job.description =
-          $(
-            'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600',
-          ).text() || null;
-
-        job.area =
-          $('h5')
-            .filter((index, element) => {
-              return $(element).text().includes('上班地點');
-            })
-            .next()
-            .text()
-            .trim() || null;
-      }
-
-      return job;
-    }),
-  );
-
   if (jobs.length === 0) throw new Error('No valid job data found.');
 
   return jobs;

@@ -3,9 +3,13 @@ import cheerioLoad from '../../plugin/cheerioLoader.js';
 
 const jobDetail = async (req, res) => {
   try {
-    const data = await puppeteerLoader(
-      'https://bankrecruit.sinopac.com/jobDetail?jobId=JOB0000494',
-    );
+    const { jobId } = req.query;
+    if (!jobId) {
+      return res.status(400).send('Job ID is required');
+    }
+
+    const url = `https://bankrecruit.sinopac.com/jobDetail?jobId=${jobId}`;
+    const data = await puppeteerLoader(url);
     const job = {};
     const $ = cheerioLoad(data);
     job.description =
@@ -20,7 +24,9 @@ const jobDetail = async (req, res) => {
         .next()
         .text()
         .trim() || null;
+
     console.log('job: ', job);
+
     res.json(job);
   } catch (error) {
     if (!res.headersSent) {

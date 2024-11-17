@@ -36,6 +36,7 @@ const puppeteerLoader = async (url) => {
         '--disable-breakpad',
         '--disable-client-side-phishing-detection',
         '--no-zygote',
+        '--remote-debugging-port=9222'
       ],
       dumpio: true,
       timeout: 60000,

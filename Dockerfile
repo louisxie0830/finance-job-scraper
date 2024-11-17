@@ -1,5 +1,5 @@
 # Builder stage
-FROM node:20-slim as builder
+FROM node:current-slim as builder
 
 WORKDIR /workspace
 
@@ -17,7 +17,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # Final stage
-FROM node:20-slim
+FROM node:current-slim
 WORKDIR /workspace
 
 RUN apt-get update \

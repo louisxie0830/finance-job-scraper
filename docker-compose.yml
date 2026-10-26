@@ -7,9 +7,9 @@ services:
     environment:
       NODE_ENV: production
       # Requests from the host reach the container from the Docker network, not 127.0.0.1.
-      # Protect the API with keys, then open the IP allowlist (comma separated, '*' for everyone).
-      API_KEYS: ${API_KEYS:?Set API_KEYS, e.g. in a .env file}
       ALLOWED_IPS: '*'
+      # Optional: require an X-API-Key header (comma-separated keys), e.g. from a .env file.
+      API_KEYS: ${API_KEYS:-}
       # CORS_ORIGINS: 'https://your-frontend.example'
     # Chrome needs more shared memory than Docker's 64MB default.
     shm_size: '1gb'

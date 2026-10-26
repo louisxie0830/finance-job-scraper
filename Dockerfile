@@ -4,38 +4,36 @@
 FROM node:24-slim AS builder
 WORKDIR /workspace
 
-# Chrome comes from the system package below, so skip Puppeteer's download.
+# The headless browser is installed in the runtime stage, not by Puppeteer's postinstall.
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src/
-RUN npm run build && npm prune --omit=dev --no-audit --no-fund
+# PM2 (optional dependency) is not needed in a container: Docker/Render restart the process.
+RUN npm run build && npm prune --omit=dev --omit=optional --no-audit --no-fund
 
-# Final stage
+# Runtime stage
 FROM node:24-slim
 WORKDIR /workspace
 
-# Install Google Chrome (amd64) from Google's apt repo; apt resolves its runtime libraries.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
-    && curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub \
-       | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-       > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-chrome-stable fonts-liberation fonts-noto-cjk \
-    && apt-get purge -y --auto-remove curl gnupg \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV NODE_ENV=production \
-    CHROME_PATH=/usr/bin/google-chrome
+    PUPPETEER_CACHE_DIR=/opt/puppeteer
 
-# App files stay owned by root (read-only for the app user); only logs/ is writable.
 COPY --from=builder /workspace/node_modules ./node_modules/
 COPY --from=builder /workspace/dist ./dist/
-COPY package.json ecosystem.config.cjs ./
+COPY package.json ./
 
+# chrome-headless-shell (the version Puppeteer is built for) plus only the system libraries it
+# needs, instead of the full Google Chrome package and its fonts. tini runs as PID 1 to forward
+# signals and reap Chrome's child processes.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tini ca-certificates \
+    && npx puppeteer browsers install chrome-headless-shell --install-deps \
+    && rm -rf /var/lib/apt/lists/* /root/.npm /tmp/*
+
+# App files stay owned by root (read-only for the app user); only logs/ is writable.
 RUN mkdir -p logs && chown node:node logs
 USER node
 
@@ -44,4 +42,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
 
-CMD ["./node_modules/.bin/pm2-runtime", "start", "ecosystem.config.cjs"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["node", "dist/server.js"]

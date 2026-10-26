@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [master, 'feat/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npx prettier --check .
+      - run: npm test
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: finance-job-scraper:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Image size
+        run: docker image ls finance-job-scraper:ci --format '{{.Size}}'
+      - name: Start container
+        run: |
+          docker run -d --name app -p 3000:3000 --shm-size=1g \
+            -e ALLOWED_IPS='*' -e WARM_UP=false finance-job-scraper:ci
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:3000/health && exit 0
+            sleep 2
+          done
+          docker logs app
+          exit 1
+      - name: Smoke test (HTTP source and headless browser source)
+        run: |
+          set -e
+          count() { curl -sf --max-time 180 "http://127.0.0.1:3000$1" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).length))'; }
+          taishin=$(count /taishin/jobs); echo "taishin: $taishin"
+          sinopac=$(count /sinopac/jobs); echo "sinopac: $sinopac"
+          test "$taishin" -gt 0
+          test "$sinopac" -gt 0
+          echo "memory: $(docker stats --no-stream --format '{{.MemUsage}}' app)"
+      - name: Container logs
+        if: always()
+        run: docker logs app 2>&1 | tail -50

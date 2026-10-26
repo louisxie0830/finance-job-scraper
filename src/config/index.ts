@@ -73,7 +73,8 @@ const config = {
     apiConcurrency: toInt(process.env.HTTP_API_CONCURRENCY, 8),
   },
   browser: {
-    // Unset falls back to Puppeteer's own lookup (PUPPETEER_EXECUTABLE_PATH or its bundled Chrome).
+    // Unset uses Puppeteer's chrome-headless-shell (`npx puppeteer browsers install chrome-headless-shell`).
+    // Set it to use an installed full Chrome instead.
     executablePath: process.env.CHROME_PATH || undefined,
     concurrency: toInt(process.env.BROWSER_CONCURRENCY, 3),
     timeoutMs: toInt(process.env.BROWSER_TIMEOUT_MS, 60 * 1000),

@@ -12,7 +12,9 @@ let browserPromise: Promise<Browser> | null = null;
 const launchBrowser = async (): Promise<Browser> => {
   const browser = await puppeteer.launch({
     executablePath: config.browser.executablePath,
-    headless: true,
+    // Default to chrome-headless-shell (Puppeteer's lightweight build: faster start, less memory).
+    // A CHROME_PATH pointing at a full Chrome needs its regular headless mode instead.
+    headless: config.browser.executablePath ? true : 'shell',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',

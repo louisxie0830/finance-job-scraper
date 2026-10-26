@@ -39,7 +39,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Image size
-        run: docker image ls finance-job-scraper:ci --format '{{.Size}}'
+        run: |
+          docker image ls finance-job-scraper:ci --format '{{.Size}}'
+          docker history finance-job-scraper:ci --format '{{.Size}}\t{{.CreatedBy}}' | cut -c1-160
       - name: Start container
         run: |
           docker run -d --name app -p 3000:3000 --shm-size=1g \

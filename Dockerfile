@@ -26,11 +26,12 @@ COPY --from=builder /workspace/dist ./dist/
 COPY package.json ./
 
 # chrome-headless-shell (the version Puppeteer is built for) plus only the system libraries it
-# needs, instead of the full Google Chrome package and its fonts. tini runs as PID 1 to forward
+# needs, instead of the full Google Chrome package and its fonts (unzip is only for the download). tini runs as PID 1 to forward
 # signals and reap Chrome's child processes.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tini ca-certificates \
+    && apt-get install -y --no-install-recommends tini ca-certificates unzip \
     && npx puppeteer browsers install chrome-headless-shell --install-deps \
+    && apt-get purge -y unzip \
     && rm -rf /var/lib/apt/lists/* /root/.npm /tmp/*
 
 # App files stay owned by root (read-only for the app user); only logs/ is writable.

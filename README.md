@@ -25,7 +25,7 @@ cd finance-job-scraper
 npm install
 ```
 
-The SinoPac routes render pages with Puppeteer. Point `CHROME_PATH` at a local Chrome, or run `npx puppeteer browsers install chrome` to download one.
+The SinoPac routes render pages with Puppeteer. Run `npx puppeteer browsers install chrome-headless-shell` once to download the lightweight headless browser, or point `CHROME_PATH` at an installed Chrome.
 
 ## Usage
 
@@ -39,10 +39,10 @@ npm run lint      # ESLint (typescript-eslint)
 npm run format    # Prettier
 ```
 
-With Docker (requires `API_KEYS`, e.g. in a `.env` file):
+With Docker. The image runs Node directly under `tini` with chrome-headless-shell; PM2 (`npm run run-prod`) is only for running outside a container. `API_KEYS` is optional:
 
 ```bash
-API_KEYS=change-me docker compose up --build
+docker compose up --build
 ```
 
 ## API
@@ -109,31 +109,31 @@ finance-job-scraper/
 
 All settings are optional environment variables (see `src/config/index.ts`):
 
-| Variable                  | Default           | Description                                                                                |
-| ------------------------- | ----------------- | ------------------------------------------------------------------------------------------ |
-| `PORT`                    | `3000`            | HTTP port                                                                                  |
-| `API_KEYS`                | (none)            | Comma-separated API keys; when set, required                                               |
-| `ALLOWED_IPS`             | `127.0.0.1,::1`   | Client IPs allowed to call the API (`*` allows all)                                        |
-| `TRUST_PROXY`             | `loopback`        | Express `trust proxy`: hop count (`1` behind Render/one proxy), `true`/`false`, or IP list |
-| `CORS_ORIGINS`            | (none)            | Comma-separated browser origins allowed via CORS                                           |
-| `DOCS_ENABLED`            | `true`            | Serve `/docs` and `/openapi.json`                                                          |
-| `WARM_UP`                 | `true`            | Scrape every source once at startup                                                        |
-| `CACHE_TTL_MS`            | `600000`          | How long scrape results are cached                                                         |
-| `CACHE_STALE_TTL_MS`      | `86400000`        | How long an expired result is still served while it refreshes                              |
-| `CACHE_MAX_ENTRIES`       | `500`             | Maximum cached entries                                                                     |
-| `MIN_REFRESH_INTERVAL_MS` | `60000`           | Minimum age before `refresh=true` re-scrapes                                               |
-| `REQUEST_TIMEOUT_MS`      | `300000`          | Respond 503 when a request takes longer                                                    |
-| `RATE_LIMIT_WINDOW_MS`    | `600000`          | Rate limit window                                                                          |
-| `RATE_LIMIT_MAX`          | `100`             | Requests per window per IP                                                                 |
-| `HTTP_TIMEOUT_MS`         | `30000`           | Timeout for outgoing HTTP requests                                                         |
-| `HTTP_MAX_CONTENT_LENGTH` | `20971520`        | Maximum upstream response size in bytes                                                    |
-| `HTTP_CONCURRENCY`        | `3`               | Parallel outgoing requests per scrape                                                      |
-| `HTTP_API_CONCURRENCY`    | `8`               | Parallel requests for public JSON APIs (Fubon, Workday)                                    |
-| `CHROME_PATH`             | Puppeteer default | Chrome executable for Puppeteer                                                            |
-| `BROWSER_CONCURRENCY`     | `3`               | Pages rendered in parallel                                                                 |
-| `BROWSER_TIMEOUT_MS`      | `60000`           | Puppeteer launch/navigation timeout                                                        |
-| `LOG_DIR`                 | `logs`            | Directory for log files                                                                    |
-| `LOG_LEVEL`               | `info`            | Winston log level                                                                          |
+| Variable                  | Default         | Description                                                                                |
+| ------------------------- | --------------- | ------------------------------------------------------------------------------------------ |
+| `PORT`                    | `3000`          | HTTP port                                                                                  |
+| `API_KEYS`                | (none)          | Comma-separated API keys; when set, required                                               |
+| `ALLOWED_IPS`             | `127.0.0.1,::1` | Client IPs allowed to call the API (`*` allows all)                                        |
+| `TRUST_PROXY`             | `loopback`      | Express `trust proxy`: hop count (`1` behind Render/one proxy), `true`/`false`, or IP list |
+| `CORS_ORIGINS`            | (none)          | Comma-separated browser origins allowed via CORS                                           |
+| `DOCS_ENABLED`            | `true`          | Serve `/docs` and `/openapi.json`                                                          |
+| `WARM_UP`                 | `true`          | Scrape every source once at startup                                                        |
+| `CACHE_TTL_MS`            | `600000`        | How long scrape results are cached                                                         |
+| `CACHE_STALE_TTL_MS`      | `86400000`      | How long an expired result is still served while it refreshes                              |
+| `CACHE_MAX_ENTRIES`       | `500`           | Maximum cached entries                                                                     |
+| `MIN_REFRESH_INTERVAL_MS` | `60000`         | Minimum age before `refresh=true` re-scrapes                                               |
+| `REQUEST_TIMEOUT_MS`      | `300000`        | Respond 503 when a request takes longer                                                    |
+| `RATE_LIMIT_WINDOW_MS`    | `600000`        | Rate limit window                                                                          |
+| `RATE_LIMIT_MAX`          | `100`           | Requests per window per IP                                                                 |
+| `HTTP_TIMEOUT_MS`         | `30000`         | Timeout for outgoing HTTP requests                                                         |
+| `HTTP_MAX_CONTENT_LENGTH` | `20971520`      | Maximum upstream response size in bytes                                                    |
+| `HTTP_CONCURRENCY`        | `3`             | Parallel outgoing requests per scrape                                                      |
+| `HTTP_API_CONCURRENCY`    | `8`             | Parallel requests for public JSON APIs (Fubon, Workday)                                    |
+| `CHROME_PATH`             | (none)          | Use an installed full Chrome instead of chrome-headless-shell                              |
+| `BROWSER_CONCURRENCY`     | `3`             | Pages rendered in parallel                                                                 |
+| `BROWSER_TIMEOUT_MS`      | `60000`         | Puppeteer launch/navigation timeout                                                        |
+| `LOG_DIR`                 | `logs`          | Directory for log files                                                                    |
+| `LOG_LEVEL`               | `info`          | Winston log level                                                                          |
 
 ## Logging
 

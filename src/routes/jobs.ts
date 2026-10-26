@@ -42,17 +42,17 @@ const scrapeFailed = (
   res.status(500).send(`Error occurred while scraping jobs (ref: ${req.id})`);
 };
 
-const loadSource = (source: Source, refresh: boolean) =>
+export const loadSource = (source: Source, refresh = false) =>
   cached(`jobs:${source.id}`, source.scrape, { ...config.cache, refresh });
 
 const sourceJobsHandler =
   (source: Source) =>
   async (req: Request, res: Response): Promise<void> => {
     const filter = parseFilter(req);
-    const { promise, hit } = loadSource(source, wantsRefresh(req));
+    const { promise, status } = loadSource(source, wantsRefresh(req));
     try {
       const jobs = await promise;
-      res.set('X-Cache', hit ? 'HIT' : 'MISS');
+      res.set('X-Cache', status);
       res.json(filterJobs(jobs, filter));
     } catch (error) {
       scrapeFailed(req, res, source.id, error);
@@ -75,7 +75,8 @@ const allJobsHandler =
 
     const results = await Promise.all(
       selected.map(async (source) => {
-        const { promise, hit } = loadSource(source, refresh);
+        const { promise, status } = loadSource(source, refresh);
+        const hit = status !== 'MISS';
         try {
           return { source, hit, jobs: await promise };
         } catch (error) {
@@ -113,14 +114,14 @@ const jobDetailHandler =
     if (!jobId || !detail.idPattern.test(jobId)) {
       throw new HttpError(400, 'Job ID is required');
     }
-    const { promise, hit } = cached(
+    const { promise, status } = cached(
       `${source.id}-detail:${jobId}`,
       () => detail.scrape(jobId),
       { ...config.cache, refresh: wantsRefresh(req) },
     );
     try {
       const result = await promise;
-      res.set('X-Cache', hit ? 'HIT' : 'MISS');
+      res.set('X-Cache', status);
       res.json(result);
     } catch (error) {
       scrapeFailed(req, res, `${source.id}-detail`, error);
@@ -140,4 +141,13 @@ export const createJobsRouter = (sources: Source[]): Router => {
     }
   }
   return router;
+};
+
+/** Starts scraping every source in the background so early requests hit the cache. */
+export const warmUp = (sources: Source[]): void => {
+  for (const source of sources) {
+    loadSource(source).promise.catch((error: Error) => {
+      logger.warn(`[warm-up] ${source.id}: ${error.message}`);
+    });
+  }
 };

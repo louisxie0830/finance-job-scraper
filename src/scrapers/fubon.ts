@@ -83,7 +83,7 @@ const scrape = async (): Promise<Job[]> => {
   const totalPages = Math.min(first.pagination?.totalPages ?? 1, MAX_PAGES);
   const rest = await mapWithConcurrency(
     Array.from({ length: Math.max(totalPages - 1, 0) }, (_, i) => i + 2),
-    config.http.concurrency,
+    config.http.apiConcurrency,
     async (page) => parseSearch(await fetchPage(page)),
   );
 

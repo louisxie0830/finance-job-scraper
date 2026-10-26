@@ -66,11 +66,11 @@ Interactive docs (Swagger UI) are served at **`/docs`**, and the OpenAPI 3.1 spe
 Job routes accept these query parameters:
 
 - `q`: space-separated keywords that must all appear in the title or description (title only for sources whose list has no descriptions).
-- `area`: text that must appear in the location. 台 and 臺 match each other.
+- `area`: text that must appear in the location or `city`. 台 and 臺 match each other. KGI lists branch/building names as its location, so its jobs also carry a `city` mapped from KGI's official branch addresses.
 - `refresh=true`: scrape again instead of using the cache.
 - `source=taishin,sinopac` (`/jobs` only): which sources to include.
 
-Results are cached in memory for 10 minutes by default, and concurrent requests for the same data share a single scrape. The `X-Cache` response header shows `HIT` or `MISS`.
+Every source is scraped once at startup, so the first requests are already served from memory. Results stay fresh for 10 minutes; after that the cached copy is still returned instantly (for up to 24 hours) while a single background scrape refreshes it (stale-while-revalidate). Concurrent requests for the same data share one scrape. The `X-Cache` response header shows `HIT`, `STALE` or `MISS`.
 
 ## Security
 
@@ -117,7 +117,9 @@ All settings are optional environment variables (see `src/config/index.ts`):
 | `TRUST_PROXY`             | `loopback`        | Express `trust proxy`: hop count (`1` behind Render/one proxy), `true`/`false`, or IP list |
 | `CORS_ORIGINS`            | (none)            | Comma-separated browser origins allowed via CORS                                           |
 | `DOCS_ENABLED`            | `true`            | Serve `/docs` and `/openapi.json`                                                          |
+| `WARM_UP`                 | `true`            | Scrape every source once at startup                                                        |
 | `CACHE_TTL_MS`            | `600000`          | How long scrape results are cached                                                         |
+| `CACHE_STALE_TTL_MS`      | `86400000`        | How long an expired result is still served while it refreshes                              |
 | `CACHE_MAX_ENTRIES`       | `500`             | Maximum cached entries                                                                     |
 | `MIN_REFRESH_INTERVAL_MS` | `60000`           | Minimum age before `refresh=true` re-scrapes                                               |
 | `REQUEST_TIMEOUT_MS`      | `300000`          | Respond 503 when a request takes longer                                                    |
@@ -126,6 +128,7 @@ All settings are optional environment variables (see `src/config/index.ts`):
 | `HTTP_TIMEOUT_MS`         | `30000`           | Timeout for outgoing HTTP requests                                                         |
 | `HTTP_MAX_CONTENT_LENGTH` | `20971520`        | Maximum upstream response size in bytes                                                    |
 | `HTTP_CONCURRENCY`        | `3`               | Parallel outgoing requests per scrape                                                      |
+| `HTTP_API_CONCURRENCY`    | `8`               | Parallel requests for public JSON APIs (Fubon, Workday)                                    |
 | `CHROME_PATH`             | Puppeteer default | Chrome executable for Puppeteer                                                            |
 | `BROWSER_CONCURRENCY`     | `3`               | Pages rendered in parallel                                                                 |
 | `BROWSER_TIMEOUT_MS`      | `60000`           | Puppeteer launch/navigation timeout                                                        |

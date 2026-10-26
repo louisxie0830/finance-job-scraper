@@ -81,6 +81,23 @@ test('workday: parses postings with company and link', () => {
   ]);
 });
 
+test('workday: maps locations to cities when a table is given', () => {
+  const [mapped, unknown] = parsePostings(
+    { ...site, cities: { '中和大樓(銀行)': '新北市' } },
+    [
+      {
+        title: 'A',
+        externalPath: '/job/A_JR1',
+        locationsText: '中和大樓(銀行)',
+      },
+      { title: 'B', externalPath: '/job/B_JR2', locationsText: '新據點' },
+    ],
+    null,
+  );
+  assert.equal(mapped?.city, '新北市');
+  assert.equal(unknown?.city, null);
+});
+
 test('workday: job id pattern allows Workday paths but not traversal', () => {
   assert.ok(WORKDAY_ID_PATTERN.test('IC_JR9437'));
   assert.ok(WORKDAY_ID_PATTERN.test('-KGIFH-Building/XMLNAME----_JR106453'));

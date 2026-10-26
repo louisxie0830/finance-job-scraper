@@ -18,6 +18,8 @@ export interface WorkdaySite {
   host: string;
   tenant: string;
   site: string;
+  /** Maps location names (often building or branch names) to a city. */
+  cities?: Record<string, string>;
 }
 
 interface Posting {
@@ -58,11 +60,13 @@ export const parsePostings = (
   (postings ?? []).flatMap((posting) => {
     const path = str(posting.externalPath);
     if (!path?.startsWith('/job/')) return [];
+    const area = str(posting.locationsText);
     return [
       {
         source: site.id,
         title: str(posting.title),
-        area: str(posting.locationsText),
+        area,
+        ...(site.cities && { city: (area && site.cities[area]) || null }),
         link: `https://${site.host}/zh-TW/${site.site}${path}`,
         id: path.slice('/job/'.length),
         company,
@@ -88,33 +92,41 @@ export const createWorkdaySource = (site: WorkdaySite): Source => {
   };
 
   // Fetching per hiring company tells us each job's company without a detail request per job.
-  const fetchCompany = async (facet: FacetValue): Promise<Job[]> => {
-    const companyId = str(facet.id);
-    const count = typeof facet.count === 'number' ? facet.count : 0;
-    if (!companyId || count === 0) return [];
-    const pages = Math.min(Math.ceil(count / PAGE_SIZE), MAX_PAGES_PER_COMPANY);
-    const results = await mapWithConcurrency(
-      Array.from({ length: pages }, (_, page) => page * PAGE_SIZE),
-      config.http.concurrency,
-      async (offset) => {
-        const data = await fetchPage(offset, { hiringCompany: [companyId] });
-        return parsePostings(site, data.jobPostings, str(facet.descriptor));
-      },
-    );
-    return results.flat();
-  };
-
+  // Every (company, page) request goes through one shared pool, so companies load in parallel.
   const scrape = async (): Promise<Job[]> => {
     const first = await fetchPage(0);
-    const companies =
+    const companies = (
       first.facets?.find((facet) => facet.facetParameter === 'hiringCompany')
-        ?.values ?? [];
+        ?.values ?? []
+    ).flatMap((facet) => {
+      const companyId = str(facet.id);
+      const count = typeof facet.count === 'number' ? facet.count : 0;
+      return companyId && count > 0
+        ? [{ companyId, name: str(facet.descriptor), count }]
+        : [];
+    });
+
+    const requests = companies.flatMap(({ companyId, name, count }) =>
+      Array.from(
+        {
+          length: Math.min(Math.ceil(count / PAGE_SIZE), MAX_PAGES_PER_COMPANY),
+        },
+        (_, page) => ({ companyId, name, offset: page * PAGE_SIZE }),
+      ),
+    );
 
     const jobs =
-      companies.length > 0
+      requests.length > 0
         ? (
-            await mapWithConcurrency(companies, 1, (facet) =>
-              fetchCompany(facet),
+            await mapWithConcurrency(
+              requests,
+              config.http.apiConcurrency,
+              async ({ companyId, name, offset }) => {
+                const data = await fetchPage(offset, {
+                  hiringCompany: [companyId],
+                });
+                return parsePostings(site, data.jobPostings, name);
+              },
             )
           ).flat()
         : parsePostings(site, first.jobPostings, null);

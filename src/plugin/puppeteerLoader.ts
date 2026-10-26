@@ -48,6 +48,17 @@ const getBrowser = (): Promise<Browser> => {
 };
 
 const BLOCKED_RESOURCES = new Set(['image', 'media', 'font']);
+// Analytics/ads never affect the content we scrape, but delay "network idle".
+const TRACKER_HOSTS =
+  /(^|\.)(googletagmanager\.com|google-analytics\.com|doubleclick\.net|facebook\.net|facebook\.com|clarity\.ms|hotjar\.com)$/;
+
+const isTracker = (rawUrl: string): boolean => {
+  try {
+    return TRACKER_HOSTS.test(new URL(rawUrl).hostname);
+  } catch {
+    return false;
+  }
+};
 
 export interface LoadOptions {
   /** Wait for client-rendered content (SPA) before reading the HTML. */
@@ -69,7 +80,10 @@ const loadPage = async (
           `Blocked browser request to ${request.url().slice(0, 200)}`,
         );
         void request.abort('accessdenied');
-      } else if (BLOCKED_RESOURCES.has(request.resourceType())) {
+      } else if (
+        BLOCKED_RESOURCES.has(request.resourceType()) ||
+        isTracker(request.url())
+      ) {
         void request.abort();
       } else {
         void request.continue();
@@ -77,8 +91,9 @@ const loadPage = async (
     });
 
     // goto follows redirects on its own, so no extra waitForNavigation is needed.
+    // With a selector to wait for, DOM ready is enough; otherwise wait for the network to settle.
     await page.goto(url, {
-      waitUntil: 'networkidle2',
+      waitUntil: waitForSelector ? 'domcontentloaded' : 'networkidle2',
       timeout: config.browser.timeoutMs,
     });
     if (waitForSelector) {

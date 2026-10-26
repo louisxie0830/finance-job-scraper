@@ -11,7 +11,8 @@ const filterParams = [
   {
     name: 'area',
     in: 'query',
-    description: 'Text that must appear in the job area, e.g. 台北.',
+    description:
+      'Text that must appear in the job area or city, e.g. 台北. 台 and 臺 match each other.',
     schema: { type: 'string', maxLength: 100 },
   },
   {
@@ -251,6 +252,11 @@ const openapi = {
           title: { type: ['string', 'null'] },
           description: { type: ['string', 'null'] },
           area: { type: ['string', 'null'] },
+          city: {
+            type: ['string', 'null'],
+            description:
+              'City or county, when `area` is a branch/building name (KGI).',
+          },
           link: { type: ['string', 'null'], format: 'uri' },
           id: {
             type: ['string', 'null'],

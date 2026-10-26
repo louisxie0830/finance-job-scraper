@@ -126,17 +126,23 @@ test('esunfhc: empty category (A1) yields empty list, bad code throws', () => {
   assert.throws(() => parseEsun({ ReturnCode: 'B9' }, { id: 1, name: 'x' }));
 });
 
-test('sinopac: parses list and tolerates missing href', () => {
+test('sinopac: parses list with area and tolerates missing href', () => {
   const cls = 'mb-2 line-clamp-2 text-lg font-bold text-gray-700';
-  const html = `<a class="${cls}" href="/jobDetail?jobId=123">交易員</a><a class="${cls}">無連結</a>`;
+  const html = `
+    <div class="cards">
+      <div class="card"><span>策略發展部</span><a class="${cls}" href="/jobDetail?jobId=123">交易員</a>
+        <p>工作地區：台北市</p><p>學歷：大學</p><p>經歷：5年以上</p><button>我要應徵</button></div>
+      <div class="card"><a class="${cls}">無連結</a><p>學歷：大學</p></div>
+    </div>`;
   assert.deepEqual(parseSinopac(html), [
     {
       source: 'sinopac',
       title: '交易員',
+      area: '台北市',
       link: 'https://bankrecruit.sinopac.com/jobDetail?jobId=123',
       id: '123',
     },
-    { source: 'sinopac', title: '無連結', link: null, id: null },
+    { source: 'sinopac', title: '無連結', area: null, link: null, id: null },
   ]);
 });
 

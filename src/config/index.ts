@@ -45,9 +45,14 @@ const config = {
   // Browser origins allowed to call the API cross-origin. Empty disables CORS.
   corsOrigins: toList(process.env.CORS_ORIGINS, []),
   docsEnabled: process.env.DOCS_ENABLED !== 'false',
+  // Scrape every source once at startup so the first requests are served from the cache.
+  warmUp: process.env.WARM_UP !== 'false',
   requestTimeoutMs: toInt(process.env.REQUEST_TIMEOUT_MS, 5 * 60 * 1000),
   cache: {
     ttlMs: toInt(process.env.CACHE_TTL_MS, 10 * 60 * 1000),
+    // After ttlMs a cached result is still served instantly for this long while it is refreshed
+    // in the background (stale-while-revalidate).
+    staleTtlMs: toInt(process.env.CACHE_STALE_TTL_MS, 24 * 60 * 60 * 1000),
     maxEntries: toInt(process.env.CACHE_MAX_ENTRIES, 500),
     // `?refresh=true` is ignored for results younger than this, so clients can't hammer the bank sites.
     minRefreshIntervalMs: toInt(process.env.MIN_REFRESH_INTERVAL_MS, 60 * 1000),
@@ -64,6 +69,8 @@ const config = {
     ),
     // Kept low: some sites (E.SUN) sit behind a WAF.
     concurrency: toInt(process.env.HTTP_CONCURRENCY, 3),
+    // For public JSON APIs built for this traffic (Fubon, Workday).
+    apiConcurrency: toInt(process.env.HTTP_API_CONCURRENCY, 8),
   },
   browser: {
     // Unset falls back to Puppeteer's own lookup (PUPPETEER_EXECUTABLE_PATH or its bundled Chrome).

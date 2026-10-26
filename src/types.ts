@@ -6,6 +6,8 @@ export interface Job {
   title: string | null;
   description?: string | null;
   area?: string | null;
+  /** City or county, when `area` is a site/branch name rather than a place (KGI). */
+  city?: string | null;
   link?: string | null;
   /** Source-specific job id, when the site exposes one. */
   id?: string | null;

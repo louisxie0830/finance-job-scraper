@@ -1,11 +1,14 @@
 import { createApp } from './app.ts';
 import config from './config/index.ts';
 import { closeBrowser } from './plugin/puppeteerLoader.ts';
+import { warmUp } from './routes/jobs.ts';
+import sources from './scrapers/index.ts';
 import logger from './winstonLogger.ts';
 
 const server = createApp().listen(config.port, () => {
   logger.info(`Server running at http://localhost:${config.port}`);
   logger.info(`API docs at http://localhost:${config.port}/docs`);
+  if (config.warmUp) warmUp(sources);
 });
 
 const shutdown = (signal: string) => {

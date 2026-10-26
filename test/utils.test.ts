@@ -15,11 +15,11 @@ test('cache: dedupes concurrent calls and caches results', async () => {
   const load = async () => ++calls;
   const first = cached('k1', load, opts);
   const second = cached('k1', load, opts);
-  assert.equal(first.hit, false);
-  assert.equal(second.hit, true);
+  assert.equal(first.status, 'MISS');
+  assert.equal(second.status, 'HIT');
   assert.deepEqual(await Promise.all([first.promise, second.promise]), [1, 1]);
   const third = cached('k1', load, opts);
-  assert.equal(third.hit, true);
+  assert.equal(third.status, 'HIT');
   assert.equal(await third.promise, 1);
   assert.equal(calls, 1);
 });
@@ -29,8 +29,41 @@ test('cache: refresh reloads a settled value', async () => {
   const load = async () => ++calls;
   await cached('k-refresh', load, opts).promise;
   const refreshed = cached('k-refresh', load, { ...opts, refresh: true });
-  assert.equal(refreshed.hit, false);
+  assert.equal(refreshed.status, 'MISS');
   assert.equal(await refreshed.promise, 2);
+});
+
+test('cache: serves stale value instantly and revalidates once', async () => {
+  let calls = 0;
+  const load = async () => ++calls;
+  const swr = { ttlMs: 0, staleTtlMs: 60_000, maxEntries: 100 };
+  assert.equal(await cached('k-swr', load, swr).promise, 1);
+
+  const stale = cached('k-swr', load, swr);
+  const staleAgain = cached('k-swr', load, swr);
+  assert.equal(stale.status, 'STALE');
+  assert.equal(await stale.promise, 1);
+  assert.equal(await staleAgain.promise, 1);
+
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(calls, 2); // one background revalidation, not two
+  assert.equal(await cached('k-swr', load, swr).promise, 2);
+});
+
+test('cache: failed revalidation keeps serving the stale value', async () => {
+  let calls = 0;
+  const load = async () => {
+    calls += 1;
+    if (calls > 1) throw new Error('site down');
+    return 'v1';
+  };
+  const swr = { ttlMs: 0, staleTtlMs: 60_000, maxEntries: 100 };
+  await cached('k-swr-fail', load, swr).promise;
+  cached('k-swr-fail', load, swr);
+  await new Promise((resolve) => setImmediate(resolve));
+  const after = cached('k-swr-fail', load, swr);
+  assert.equal(after.status, 'STALE');
+  assert.equal(await after.promise, 'v1');
 });
 
 test('cache: failures are not cached', async () => {
@@ -82,6 +115,13 @@ test('filterJobs: filters by area and passes through when empty', () => {
     filterJobs(jobs, { area: '臺北' }).map((job) => job.source),
     ['taishin'],
   );
+  const kgiJob: Job = {
+    source: 'kgi',
+    title: '工程師',
+    area: '凱基金控總部/ KGIFH Building',
+    city: '台北市',
+  };
+  assert.equal(filterJobs([kgiJob], { area: '台北' }).length, 1);
 });
 
 const run = (middleware: RequestHandler, ip: string) => {

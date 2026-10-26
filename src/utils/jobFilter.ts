@@ -3,7 +3,7 @@ import type { Job } from '../types.ts';
 export interface JobFilter {
   /** Keywords that must all appear in the title or description. */
   q?: string;
-  /** Text that must appear in the area. */
+  /** Text that must appear in the area or city. */
   area?: string;
 }
 
@@ -20,7 +20,9 @@ export const filterJobs = (jobs: Job[], { q, area }: JobFilter): Job[] => {
     const text = `${normalize(job.title)} ${normalize(job.description)}`;
     return (
       keywords.every((keyword) => text.includes(keyword)) &&
-      (!areaText || normalize(job.area).includes(areaText))
+      (!areaText ||
+        normalize(job.area).includes(areaText) ||
+        normalize(job.city).includes(areaText))
     );
   });
 };

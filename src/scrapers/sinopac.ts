@@ -19,9 +19,23 @@ export const parseJobs = (data: string): Job[] => {
 
   return jobElements.toArray().map((element) => {
     const href = $(element).attr('href');
+    // The job's own card (the ancestor holding only this link) reads "…工作地區：台北市學歷：…".
+    const cardText = $(element)
+      .parents()
+      .filter(
+        (index, parent) =>
+          $(parent).find(JOB_LINK_SELECTOR).length === 1 &&
+          $(parent).text().includes('工作地區'),
+      )
+      .first()
+      .text();
+    const area = cardText.match(
+      /工作地區[：:]\s*(.+?)\s*(?:學歷|經歷|我要應徵|$)/,
+    )?.[1];
     return {
       source: 'sinopac',
       title: $(element).text().trim() || null,
+      area: area?.trim() || null,
       link: href ? `${BASE_URL}${href}` : null,
       id: href?.split('=')[1] || null,
     };

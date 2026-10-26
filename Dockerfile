@@ -1,87 +1,47 @@
-# Builder stage
-FROM node:current-slim as builder
+# syntax=docker/dockerfile:1
 
+# Builder stage: compile TypeScript, then keep production dependencies only.
+FROM node:24-slim AS builder
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    python3 \
-    make \
-    build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm set progress=false && \
-    npm config set depth 0
-
+# Chrome comes from the system package below, so skip Puppeteer's download.
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
+COPY tsconfig.json tsconfig.build.json ./
+COPY src ./src/
+RUN npm run build && npm prune --omit=dev --no-audit --no-fund
 
 # Final stage
-FROM node:current-slim
+FROM node:24-slim
 WORKDIR /workspace
 
+# Install Google Chrome (amd64) from Google's apt repo; apt resolves its runtime libraries.
 RUN apt-get update \
-    && apt-get install -y wget gnupg xvfb dbus-x11 \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+    && curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub \
+       | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+       > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && apt-get install -y \
-    libvips \
-    gconf-service \
-    libasound2 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libpango-1.0-0 \
-    libgcc1 \
-    libdrm2 \
-    libgconf-2-4 \
-    libgdk-pixbuf2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxtst6 \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator1 \
-    lsb-release \
-    xdg-utils \
-    libxshmfence1 \
-    libgbm1 \
-    libpango1.0-0 \
-    libcairo2 \
-    libxkbcommon0 \
-    --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    fc-cache -fv
+    && apt-get install -y --no-install-recommends google-chrome-stable fonts-liberation fonts-noto-cjk \
+    && apt-get purge -y --auto-remove curl gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
+ENV NODE_ENV=production \
+    CHROME_PATH=/usr/bin/google-chrome
 
+# App files stay owned by root (read-only for the app user); only logs/ is writable.
 COPY --from=builder /workspace/node_modules ./node_modules/
-COPY ./ecosystem.config.cjs .
-COPY ./package.json .
-COPY ./src ./src/
-COPY ./combined.log .
-COPY ./combined.log ./src/
-COPY ./start.sh ./
+COPY --from=builder /workspace/dist ./dist/
+COPY package.json ecosystem.config.cjs ./
 
-RUN chmod +x start.sh
-
-USER root
+RUN mkdir -p logs && chown node:node logs
+USER node
 
 EXPOSE 3000
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
 
-CMD ["./start.sh"]
+CMD ["./node_modules/.bin/pm2-runtime", "start", "ecosystem.config.cjs"]

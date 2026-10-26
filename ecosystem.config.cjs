@@ -1,21 +1,19 @@
-const os = require('os');
-
-const totalMemoryGB = Math.floor(os.totalmem() / 1024 / 1024 / 1024);
-
 module.exports = {
   apps: [
     {
       name: 'finance-job-scraper',
-      script: './src/app.js',
-      instances: 'max',
-      // exec_mode: 'cluster',
+      script: './dist/server.js',
+      // A single process: the shared Chrome, cache and rate limiter all live in memory.
+      instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
-      max_memory_restart: `${totalMemoryGB}G`,
-      error_file: "./logs/error.log",
-      out_file: "./logs/output.log",
-      log_date_format: "YYYY-MM-DD HH:mm:ss",
-      cron_restart: "0 2 * * *",
+      max_memory_restart: process.env.MAX_MEMORY_RESTART || '1G',
+      kill_timeout: 10000,
+      error_file: './logs/pm2-error.log',
+      out_file: './logs/pm2-output.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+      cron_restart: '0 2 * * *',
       env: {
         NODE_ENV: 'production',
       },

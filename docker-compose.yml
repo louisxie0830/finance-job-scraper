@@ -2,9 +2,30 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
-      # - "443:443"
-      # - "80:80"
-      # - "49152-65535:49152-65535/udp"
+      # Bound to the host's loopback only; put a reverse proxy (TLS) in front for remote access.
+      - '127.0.0.1:3000:3000'
     environment:
       NODE_ENV: production
+      # Requests from the host reach the container from the Docker network, not 127.0.0.1.
+      # Protect the API with keys, then open the IP allowlist (comma separated, '*' for everyone).
+      API_KEYS: ${API_KEYS:?Set API_KEYS, e.g. in a .env file}
+      ALLOWED_IPS: '*'
+      # CORS_ORIGINS: 'https://your-frontend.example'
+    # Chrome needs more shared memory than Docker's 64MB default.
+    shm_size: '1gb'
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /home/node
+    volumes:
+      - logs:/workspace/logs
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
+    mem_limit: 2g
+
+volumes:
+  logs:

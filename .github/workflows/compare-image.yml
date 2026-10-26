@@ -2,7 +2,8 @@
 name: Compare image size
 
 on:
-  workflow_dispatch:
+  push:
+    branches: ['feat/**']
 
 permissions:
   contents: read

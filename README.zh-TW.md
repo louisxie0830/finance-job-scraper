@@ -93,7 +93,7 @@ GitHub Actions（`.github/workflows/ci.yml`）會在每次 push 與 pull request
 
 `render.yaml` 是 [Render Blueprint](https://render.com/docs/blueprint-spec) 設定檔：以 Docker 部署 web service，區域設在**新加坡**（離被抓取的台灣網站最近），健康檢查使用 `/health`（部署不中斷），且 CI 通過後才自動部署（`autoDeployTrigger: checksPass`）。請在 Render Dashboard → New → Blueprint 套用。Render 無法更改既有服務的區域，所以要換區域就得用 Blueprint 建立新服務（先刪除舊服務，才能保留同一個 `onrender.com` 名稱）。
 
-免費方案閒置 15 分鐘後會休眠，喚醒約需 20–30 秒。`.github/workflows/keep-alive.yml` 每 10 分鐘 ping 一次 `/health` 讓服務保持運作，這會用掉免費方案每月 750 小時額度的大部分。可用 repository 變數 `RENDER_URL` 覆寫網址；改用付費方案後可停用此 workflow。
+免費方案閒置 15 分鐘後會休眠，喚醒約需 20–30 秒；服務啟動時會重新抓取每個來源，所以喚醒後的第一個請求會比較慢。
 
 ## 資安
 

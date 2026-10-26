@@ -21,6 +21,10 @@ const sources: Source[] = [
         { source: 'taishin', title: '理財專員', area: '台中市' },
       ];
     },
+    detail: {
+      idPattern: /^[\w-]{1,64}$/,
+      scrape: async (jobId) => ({ description: `detail ${jobId}`, area: null }),
+    },
   },
   {
     id: 'cathaybk',
@@ -111,11 +115,20 @@ test('GET /jobs rejects unknown sources and oversized filters', async () => {
   assert.equal((await fetch(`${baseUrl}/jobs?q=${longQ}`)).status, 400);
 });
 
-test('GET /sinopac/job/description validates jobId', async () => {
-  const missing = await fetch(`${baseUrl}/sinopac/job/description`);
-  assert.equal(missing.status, 400);
-  const bad = await fetch(`${baseUrl}/sinopac/job/description?jobId=../x`);
-  assert.equal(bad.status, 400);
+test('GET /:source/job/description validates jobId and caches', async () => {
+  const url = `${baseUrl}/taishin/job/description`;
+  assert.equal((await fetch(url)).status, 400);
+  assert.equal((await fetch(`${url}?jobId=../x`)).status, 400);
+  const ok = await fetch(`${url}?jobId=A1`);
+  assert.equal(ok.status, 200);
+  assert.deepEqual(await ok.json(), { description: 'detail A1', area: null });
+  const again = await fetch(`${url}?jobId=A1`);
+  assert.equal(again.headers.get('x-cache'), 'HIT');
+  // Sources without a detail scraper get no description route.
+  assert.equal(
+    (await fetch(`${baseUrl}/cathaybk/job/description?jobId=A1`)).status,
+    404,
+  );
 });
 
 test('GET /health reveals only liveness; /status has details', async () => {

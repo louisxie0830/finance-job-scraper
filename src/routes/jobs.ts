@@ -1,6 +1,5 @@
 import { Router, type Request, type Response } from 'express';
 import config from '../config/index.ts';
-import { JOB_ID_PATTERN, scrapeJobDetail } from '../scrapers/sinopac.ts';
 import { cached } from '../utils/cache.ts';
 import { HttpError } from '../utils/httpError.ts';
 import { filterJobs, type JobFilter } from '../utils/jobFilter.ts';
@@ -107,34 +106,38 @@ const allJobsHandler =
     });
   };
 
-const sinopacDetailHandler = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const jobId = queryString(req, 'jobId');
-  if (!jobId || !JOB_ID_PATTERN.test(jobId)) {
-    throw new HttpError(400, 'Job ID is required');
-  }
-  const { promise, hit } = cached(
-    `sinopac-detail:${jobId}`,
-    () => scrapeJobDetail(jobId),
-    { ...config.cache, refresh: wantsRefresh(req) },
-  );
-  try {
-    const detail = await promise;
-    res.set('X-Cache', hit ? 'HIT' : 'MISS');
-    res.json(detail);
-  } catch (error) {
-    scrapeFailed(req, res, 'sinopac-detail', error);
-  }
-};
+const jobDetailHandler =
+  (source: Source, detail: NonNullable<Source['detail']>) =>
+  async (req: Request, res: Response): Promise<void> => {
+    const jobId = queryString(req, 'jobId');
+    if (!jobId || !detail.idPattern.test(jobId)) {
+      throw new HttpError(400, 'Job ID is required');
+    }
+    const { promise, hit } = cached(
+      `${source.id}-detail:${jobId}`,
+      () => detail.scrape(jobId),
+      { ...config.cache, refresh: wantsRefresh(req) },
+    );
+    try {
+      const result = await promise;
+      res.set('X-Cache', hit ? 'HIT' : 'MISS');
+      res.json(result);
+    } catch (error) {
+      scrapeFailed(req, res, `${source.id}-detail`, error);
+    }
+  };
 
 export const createJobsRouter = (sources: Source[]): Router => {
   const router = Router();
   router.get('/jobs', allJobsHandler(sources));
   for (const source of sources) {
     router.get(`/${source.id}/jobs`, sourceJobsHandler(source));
+    if (source.detail) {
+      router.get(
+        `/${source.id}/job/description`,
+        jobDetailHandler(source, source.detail),
+      );
+    }
   }
-  router.get('/sinopac/job/description', sinopacDetailHandler);
   return router;
 };

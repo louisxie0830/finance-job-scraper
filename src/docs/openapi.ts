@@ -45,6 +45,8 @@ const protectedResponses = {
 
 const security = [{ ApiKeyAuth: [] }];
 
+const pascal = (id: string) => `${id[0]?.toUpperCase()}${id.slice(1)}`;
+
 const sourcePaths = Object.fromEntries(
   sources.map((source) => [
     `/${source.id}/jobs`,
@@ -52,7 +54,7 @@ const sourcePaths = Object.fromEntries(
       get: {
         tags: ['Jobs'],
         summary: `Job listings from ${source.name}`,
-        operationId: `get${source.id[0]?.toUpperCase()}${source.id.slice(1)}Jobs`,
+        operationId: `get${pascal(source.id)}Jobs`,
         security,
         parameters: filterParams,
         responses: {
@@ -77,6 +79,62 @@ const sourcePaths = Object.fromEntries(
       },
     },
   ]),
+);
+
+const DETAIL_EXAMPLES: Partial<Record<string, string>> = {
+  sinopac: 'JOB0000718',
+  fubon: 'BUFTW0022120260001',
+  ctbc: 'IC_JR9437',
+};
+
+const detailPaths = Object.fromEntries(
+  sources.flatMap((source) =>
+    source.detail
+      ? [
+          [
+            `/${source.id}/job/description`,
+            {
+              get: {
+                tags: ['Jobs'],
+                summary: `Description and location of a ${source.name} job`,
+                operationId: `get${pascal(source.id)}JobDetail`,
+                security,
+                parameters: [
+                  {
+                    name: 'jobId',
+                    in: 'query',
+                    required: true,
+                    description: `The \`id\` returned by /${source.id}/jobs.`,
+                    schema: {
+                      type: 'string',
+                      pattern: source.detail.idPattern.source,
+                    },
+                    example: DETAIL_EXAMPLES[source.id],
+                  },
+                  filterParams[2],
+                ],
+                responses: {
+                  200: {
+                    description: 'Job detail',
+                    headers: xCache,
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/JobDetail' },
+                      },
+                    },
+                  },
+                  400: textError('Missing or invalid jobId'),
+                  ...protectedResponses,
+                  500: textError(
+                    'Scraping failed. The body carries a reference id for the server log.',
+                  ),
+                },
+              },
+            },
+          ],
+        ]
+      : [],
+  ),
 );
 
 const openapi = {
@@ -130,41 +188,7 @@ const openapi = {
       },
     },
     ...sourcePaths,
-    '/sinopac/job/description': {
-      get: {
-        tags: ['Jobs'],
-        summary: 'Description and location of a SinoPac job',
-        operationId: 'getSinopacJobDetail',
-        security,
-        parameters: [
-          {
-            name: 'jobId',
-            in: 'query',
-            required: true,
-            description: 'The `id` returned by /sinopac/jobs.',
-            schema: { type: 'string', pattern: '^[\\w-]{1,64}$' },
-            example: 'JOB0000718',
-          },
-          filterParams[2],
-        ],
-        responses: {
-          200: {
-            description: 'Job detail',
-            headers: xCache,
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/JobDetail' },
-              },
-            },
-          },
-          400: textError('Missing or invalid jobId'),
-          ...protectedResponses,
-          500: textError(
-            'Scraping failed. The body carries a reference id for the server log.',
-          ),
-        },
-      },
-    },
+    ...detailPaths,
     '/health': {
       get: {
         tags: ['System'],
@@ -231,6 +255,10 @@ const openapi = {
           id: {
             type: ['string', 'null'],
             description: 'Source-specific job id.',
+          },
+          company: {
+            type: ['string', 'null'],
+            description: 'Hiring company within the group (Fubon, CTBC, KGI).',
           },
           key: { type: 'string', description: 'Job category key (E.SUN).' },
           category: {

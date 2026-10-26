@@ -9,7 +9,7 @@ const JOB_LINK_SELECTOR = 'a.mb-2.line-clamp-2.text-lg.font-bold.text-gray-700';
 const DESCRIPTION_SELECTOR =
   'p.col-span-12.list-inside.list-decimal.whitespace-pre-line.break-words.text-gray-600';
 
-export const JOB_ID_PATTERN = /^[\w-]{1,64}$/;
+const JOB_ID_PATTERN = /^[\w-]{1,64}$/;
 
 export const parseJobs = (data: string): Job[] => {
   const $ = cheerioLoad(data);
@@ -41,7 +41,7 @@ export const parseJobDetail = (data: string): JobDetail => {
   };
 };
 
-export const scrapeJobDetail = async (jobId: string): Promise<JobDetail> => {
+const scrapeJobDetail = async (jobId: string): Promise<JobDetail> => {
   const url = `${BASE_URL}/jobDetail?jobId=${encodeURIComponent(jobId)}`;
   return parseJobDetail(
     await loadRenderedHtml(url, { waitForSelector: DESCRIPTION_SELECTOR }),
@@ -57,6 +57,7 @@ const sinopac: Source = {
         waitForSelector: JOB_LINK_SELECTOR,
       }),
     ),
+  detail: { idPattern: JOB_ID_PATTERN, scrape: scrapeJobDetail },
 };
 
 export default sinopac;

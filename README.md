@@ -49,20 +49,23 @@ API_KEYS=change-me docker compose up --build
 
 Interactive docs (Swagger UI) are served at **`/docs`**, and the OpenAPI 3.1 spec at `/openapi.json`.
 
-| Route                                     | Description                                                 |
-| ----------------------------------------- | ----------------------------------------------------------- |
-| `GET /jobs`                               | All sources in one response, with per-source status         |
-| `GET /taishin/jobs`                       | Taishin Bank                                                |
-| `GET /cathaybk/jobs`                      | Cathay Financial Holdings (all subsidiaries)                |
-| `GET /esunfhc/jobs`                       | E.SUN FHC                                                   |
-| `GET /sinopac/jobs`                       | SinoPac Holdings                                            |
-| `GET /sinopac/job/description?jobId=<id>` | A SinoPac job's description and location                    |
-| `GET /health`                             | Liveness probe (public)                                     |
-| `GET /status`                             | Uptime, memory, cache and browser status (requires API key) |
+| Route                                      | Description                                                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `GET /jobs`                                | All sources in one response, with per-source status                                                             |
+| `GET /taishin/jobs`                        | Taishin Bank                                                                                                    |
+| `GET /cathaybk/jobs`                       | Cathay Financial Holdings (all subsidiaries)                                                                    |
+| `GET /esunfhc/jobs`                        | E.SUN FHC                                                                                                       |
+| `GET /sinopac/jobs`                        | SinoPac Holdings                                                                                                |
+| `GET /fubon/jobs`                          | Fubon Financial Holding (all subsidiaries)                                                                      |
+| `GET /ctbc/jobs`                           | CTBC Financial Holding (all subsidiaries)                                                                       |
+| `GET /kgi/jobs`                            | KGI Financial Holding (all subsidiaries)                                                                        |
+| `GET /{source}/job/description?jobId=<id>` | One job's description and location, for `sinopac`, `fubon`, `ctbc` and `kgi` (their lists have no descriptions) |
+| `GET /health`                              | Liveness probe (public)                                                                                         |
+| `GET /status`                              | Uptime, memory, cache and browser status (requires API key)                                                     |
 
 Job routes accept these query parameters:
 
-- `q`: space-separated keywords that must all appear in the title or description.
+- `q`: space-separated keywords that must all appear in the title or description (title only for sources whose list has no descriptions).
 - `area`: text that must appear in the location. 台 and 臺 match each other.
 - `refresh=true`: scrape again instead of using the cache.
 - `source=taishin,sinopac` (`/jobs` only): which sources to include.

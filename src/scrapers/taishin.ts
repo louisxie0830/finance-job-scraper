@@ -11,7 +11,9 @@ export const parseJobs = (data: string): Job[] => {
   if (jobElements.length === 0)
     throw new Error('No job listings found on the page.');
 
-  return jobElements.toArray().map((element) => {
+  // The selector also matches <li> elements nested inside each job card; those have no
+  // title or link and are dropped below.
+  const jobs: Job[] = jobElements.toArray().map((element) => {
     const $element = $(element);
     const href = $element.find('.m-section-hd a').attr('href');
     return {
@@ -22,6 +24,7 @@ export const parseJobs = (data: string): Job[] => {
       link: href ? `${BASE_URL}${href}` : null,
     };
   });
+  return jobs.filter((job) => job.title || job.link);
 };
 
 const taishin: Source = {

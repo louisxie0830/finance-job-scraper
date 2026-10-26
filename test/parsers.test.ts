@@ -18,6 +18,7 @@ test('taishin: parses job list', () => {
       <div class="m-section-hd"><a href="/Job/Detail/1"><span class="b-space-preline"> 理財專員 </span></a></div>
       <div class="m-item-bd"><p>負責理財業務</p></div>
       <div class="m-item-ft b-text-gray-8e"><p>台北市</p></div>
+      <ul><li>nested list item inside the card</li></ul>
     </li></ul></div>`;
   assert.deepEqual(parseTaishin(html), [
     {

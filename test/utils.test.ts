@@ -5,6 +5,7 @@ import type { Request, RequestHandler, Response } from 'express';
 import { cached, cacheSize, clearCache } from '../src/utils/cache.ts';
 import { filterJobs } from '../src/utils/jobFilter.ts';
 import ipAllowlist from '../src/middleware/ipAllowlist.ts';
+import { parseTrustProxy } from '../src/config/index.ts';
 import type { Job } from '../src/types.ts';
 
 const opts = { ttlMs: 1000, maxEntries: 100 };
@@ -109,4 +110,16 @@ test('ipAllowlist: allows listed and IPv4-mapped addresses', () => {
 
 test('ipAllowlist: wildcard allows everyone', () => {
   assert.equal(run(ipAllowlist(['*']), '10.0.0.5').passed, true);
+});
+
+test('parseTrustProxy: hop counts, booleans and lists', () => {
+  assert.deepEqual(parseTrustProxy(undefined), ['loopback']);
+  assert.equal(parseTrustProxy('1'), 1);
+  assert.equal(parseTrustProxy(' 2 '), 2);
+  assert.equal(parseTrustProxy('true'), true);
+  assert.equal(parseTrustProxy('false'), false);
+  assert.deepEqual(parseTrustProxy('loopback, 10.0.0.0/8'), [
+    'loopback',
+    '10.0.0.0/8',
+  ]);
 });

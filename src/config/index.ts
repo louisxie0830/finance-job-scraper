@@ -11,11 +11,24 @@ const toList = (value: string | undefined, fallback: string[]): string[] =>
         .filter(Boolean)
     : fallback;
 
+// Express `trust proxy`: a hop count ("1" behind one proxy such as Render),
+// true/false, or a comma-separated list of IPs/subnets/names like "loopback".
+export const parseTrustProxy = (
+  value: string | undefined,
+): number | boolean | string[] => {
+  const trimmed = value?.trim();
+  if (!trimmed) return ['loopback'];
+  if (/^\d+$/.test(trimmed)) return Number(trimmed);
+  if (trimmed === 'true') return true;
+  if (trimmed === 'false') return false;
+  return toList(trimmed, ['loopback']);
+};
+
 const config = {
   port: toInt(process.env.PORT, 3000),
   // Only these client IPs may call the API. Use '*' to allow everyone.
   allowedIps: toList(process.env.ALLOWED_IPS, ['127.0.0.1', '::1']),
-  trustProxy: toList(process.env.TRUST_PROXY, ['loopback']),
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   // When set, every job route requires an `X-API-Key` header matching one of these keys.
   apiKeys: toList(process.env.API_KEYS, []),
   // Browser origins allowed to call the API cross-origin. Empty disables CORS.

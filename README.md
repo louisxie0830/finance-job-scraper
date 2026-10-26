@@ -106,28 +106,28 @@ finance-job-scraper/
 
 All settings are optional environment variables (see `src/config/index.ts`):
 
-| Variable                  | Default           | Description                                         |
-| ------------------------- | ----------------- | --------------------------------------------------- |
-| `PORT`                    | `3000`            | HTTP port                                           |
-| `API_KEYS`                | (none)            | Comma-separated API keys; when set, required        |
-| `ALLOWED_IPS`             | `127.0.0.1,::1`   | Client IPs allowed to call the API (`*` allows all) |
-| `TRUST_PROXY`             | `loopback`        | Express `trust proxy` setting                       |
-| `CORS_ORIGINS`            | (none)            | Comma-separated browser origins allowed via CORS    |
-| `DOCS_ENABLED`            | `true`            | Serve `/docs` and `/openapi.json`                   |
-| `CACHE_TTL_MS`            | `600000`          | How long scrape results are cached                  |
-| `CACHE_MAX_ENTRIES`       | `500`             | Maximum cached entries                              |
-| `MIN_REFRESH_INTERVAL_MS` | `60000`           | Minimum age before `refresh=true` re-scrapes        |
-| `REQUEST_TIMEOUT_MS`      | `300000`          | Respond 503 when a request takes longer             |
-| `RATE_LIMIT_WINDOW_MS`    | `600000`          | Rate limit window                                   |
-| `RATE_LIMIT_MAX`          | `100`             | Requests per window per IP                          |
-| `HTTP_TIMEOUT_MS`         | `30000`           | Timeout for outgoing HTTP requests                  |
-| `HTTP_MAX_CONTENT_LENGTH` | `20971520`        | Maximum upstream response size in bytes             |
-| `HTTP_CONCURRENCY`        | `3`               | Parallel outgoing requests per scrape               |
-| `CHROME_PATH`             | Puppeteer default | Chrome executable for Puppeteer                     |
-| `BROWSER_CONCURRENCY`     | `3`               | Pages rendered in parallel                          |
-| `BROWSER_TIMEOUT_MS`      | `60000`           | Puppeteer launch/navigation timeout                 |
-| `LOG_DIR`                 | `logs`            | Directory for log files                             |
-| `LOG_LEVEL`               | `info`            | Winston log level                                   |
+| Variable                  | Default           | Description                                                                                |
+| ------------------------- | ----------------- | ------------------------------------------------------------------------------------------ |
+| `PORT`                    | `3000`            | HTTP port                                                                                  |
+| `API_KEYS`                | (none)            | Comma-separated API keys; when set, required                                               |
+| `ALLOWED_IPS`             | `127.0.0.1,::1`   | Client IPs allowed to call the API (`*` allows all)                                        |
+| `TRUST_PROXY`             | `loopback`        | Express `trust proxy`: hop count (`1` behind Render/one proxy), `true`/`false`, or IP list |
+| `CORS_ORIGINS`            | (none)            | Comma-separated browser origins allowed via CORS                                           |
+| `DOCS_ENABLED`            | `true`            | Serve `/docs` and `/openapi.json`                                                          |
+| `CACHE_TTL_MS`            | `600000`          | How long scrape results are cached                                                         |
+| `CACHE_MAX_ENTRIES`       | `500`             | Maximum cached entries                                                                     |
+| `MIN_REFRESH_INTERVAL_MS` | `60000`           | Minimum age before `refresh=true` re-scrapes                                               |
+| `REQUEST_TIMEOUT_MS`      | `300000`          | Respond 503 when a request takes longer                                                    |
+| `RATE_LIMIT_WINDOW_MS`    | `600000`          | Rate limit window                                                                          |
+| `RATE_LIMIT_MAX`          | `100`             | Requests per window per IP                                                                 |
+| `HTTP_TIMEOUT_MS`         | `30000`           | Timeout for outgoing HTTP requests                                                         |
+| `HTTP_MAX_CONTENT_LENGTH` | `20971520`        | Maximum upstream response size in bytes                                                    |
+| `HTTP_CONCURRENCY`        | `3`               | Parallel outgoing requests per scrape                                                      |
+| `CHROME_PATH`             | Puppeteer default | Chrome executable for Puppeteer                                                            |
+| `BROWSER_CONCURRENCY`     | `3`               | Pages rendered in parallel                                                                 |
+| `BROWSER_TIMEOUT_MS`      | `60000`           | Puppeteer launch/navigation timeout                                                        |
+| `LOG_DIR`                 | `logs`            | Directory for log files                                                                    |
+| `LOG_LEVEL`               | `info`            | Winston log level                                                                          |
 
 ## Logging
 

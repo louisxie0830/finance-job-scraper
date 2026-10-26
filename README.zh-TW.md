@@ -10,6 +10,7 @@
 - [安裝](#安裝)
 - [使用方式](#使用方式)
 - [API](#api)
+- [部署（Render）](#部署render)
 - [資安](#資安)
 - [專案結構](#專案結構)
 - [設定](#設定)
@@ -87,6 +88,12 @@ GitHub Actions（`.github/workflows/ci.yml`）會在每次 push 與 pull request
 - `source=taishin,sinopac`（僅 `/jobs`）：只包含指定的來源。
 
 服務啟動時會先把每個來源抓一次，所以最初的請求就能直接從記憶體回傳。資料 10 分鐘內視為最新；超過後仍會立即回傳快取（最長 24 小時），同時在背景重新抓取一次（stale-while-revalidate）。同時間對相同資料的請求只會觸發一次抓取。回應標頭 `X-Cache` 會標示 `HIT`、`STALE` 或 `MISS`。
+
+## 部署（Render）
+
+`render.yaml` 是 [Render Blueprint](https://render.com/docs/blueprint-spec) 設定檔：以 Docker 部署 web service，區域設在**新加坡**（離被抓取的台灣網站最近），健康檢查使用 `/health`（部署不中斷），且 CI 通過後才自動部署（`autoDeployTrigger: checksPass`）。請在 Render Dashboard → New → Blueprint 套用。Render 無法更改既有服務的區域，所以要換區域就得用 Blueprint 建立新服務（先刪除舊服務，才能保留同一個 `onrender.com` 名稱）。
+
+免費方案閒置 15 分鐘後會休眠，喚醒約需 20–30 秒。`.github/workflows/keep-alive.yml` 每 10 分鐘 ping 一次 `/health` 讓服務保持運作，這會用掉免費方案每月 750 小時額度的大部分。可用 repository 變數 `RENDER_URL` 覆寫網址；改用付費方案後可停用此 workflow。
 
 ## 資安
 

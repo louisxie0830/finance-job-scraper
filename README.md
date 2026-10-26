@@ -10,6 +10,7 @@ A Node.js / TypeScript API that collects job listings from Taiwanese financial c
 - [Installation](#installation)
 - [Usage](#usage)
 - [API](#api)
+- [Deployment (Render)](#deployment-render)
 - [Security](#security)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
@@ -87,6 +88,12 @@ Job routes accept these query parameters:
 - `source=taishin,sinopac` (`/jobs` only): which sources to include.
 
 Every source is scraped once at startup, so the first requests are already served from memory. Results stay fresh for 10 minutes; after that the cached copy is still returned instantly (for up to 24 hours) while a single background scrape refreshes it (stale-while-revalidate). Concurrent requests for the same data share one scrape. The `X-Cache` response header shows `HIT`, `STALE` or `MISS`.
+
+## Deployment (Render)
+
+`render.yaml` is a [Render Blueprint](https://render.com/docs/blueprint-spec) for a Docker web service in the **Singapore** region (closest to the scraped Taiwanese sites), with `/health` as the health check (zero-downtime deploys) and auto-deploys only after CI passes (`autoDeployTrigger: checksPass`). Apply it from Render Dashboard → New → Blueprint. Render can't change an existing service's region, so moving region means creating the service from the Blueprint (delete the old service first to keep the same `onrender.com` name).
+
+On the free plan the service spins down after 15 idle minutes and takes about 20–30 seconds to wake. `.github/workflows/keep-alive.yml` pings `/health` every 10 minutes to keep it up; that uses most of the free plan's 750 instance hours per month. Override the URL with the `RENDER_URL` repository variable, or disable the workflow if you upgrade to a paid plan.
 
 ## Security
 

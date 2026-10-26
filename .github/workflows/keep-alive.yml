@@ -1,0 +1,21 @@
+# Pings the Render service so the free plan doesn't spin down after 15 idle minutes.
+# Scheduled workflows run on the default branch only, and GitHub may delay or skip runs
+# under load. Override the URL with the RENDER_URL repository variable.
+name: Keep alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping /health
+        env:
+          URL: ${{ vars.RENDER_URL || 'https://finance-job-scraper.onrender.com' }}
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 90 "$URL/health"

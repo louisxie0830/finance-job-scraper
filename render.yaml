@@ -1,0 +1,24 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Apply it with Render Dashboard → New → Blueprint → this repository.
+services:
+  - type: web
+    name: finance-job-scraper
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    # Closest Render region to Taiwan: the scraped bank sites and most users are there.
+    region: singapore
+    plan: free
+    branch: master
+    # Deploy only after the GitHub Actions CI (tests + Docker smoke test) passes.
+    autoDeployTrigger: checksPass
+    # Render waits for this to return 200 before switching traffic (zero-downtime deploys).
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The free plan has a fraction of a CPU; fewer parallel pages render faster overall.
+      - key: BROWSER_CONCURRENCY
+        value: '2'
+      # Optional: set in the dashboard to require an X-API-Key header.
+      - key: API_KEYS
+        sync: false

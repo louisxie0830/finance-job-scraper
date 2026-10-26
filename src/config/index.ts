@@ -15,20 +15,31 @@ const toList = (value: string | undefined, fallback: string[]): string[] =>
 // true/false, or a comma-separated list of IPs/subnets/names like "loopback".
 export const parseTrustProxy = (
   value: string | undefined,
+  fallback: number | string[] = ['loopback'],
 ): number | boolean | string[] => {
   const trimmed = value?.trim();
-  if (!trimmed) return ['loopback'];
+  if (!trimmed) return fallback;
   if (/^\d+$/.test(trimmed)) return Number(trimmed);
   if (trimmed === 'true') return true;
   if (trimmed === 'false') return false;
   return toList(trimmed, ['loopback']);
 };
 
+// Render sets RENDER=true. Its clients arrive through one proxy hop, never from localhost,
+// so the localhost-only defaults would block every request there.
+const onRender = process.env.RENDER === 'true';
+
 const config = {
   port: toInt(process.env.PORT, 3000),
   // Only these client IPs may call the API. Use '*' to allow everyone.
-  allowedIps: toList(process.env.ALLOWED_IPS, ['127.0.0.1', '::1']),
-  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  allowedIps: toList(
+    process.env.ALLOWED_IPS,
+    onRender ? ['*'] : ['127.0.0.1', '::1'],
+  ),
+  trustProxy: parseTrustProxy(
+    process.env.TRUST_PROXY,
+    onRender ? 1 : ['loopback'],
+  ),
   // When set, every job route requires an `X-API-Key` header matching one of these keys.
   apiKeys: toList(process.env.API_KEYS, []),
   // Browser origins allowed to call the API cross-origin. Empty disables CORS.

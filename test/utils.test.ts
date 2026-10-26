@@ -118,6 +118,8 @@ test('parseTrustProxy: hop counts, booleans and lists', () => {
   assert.equal(parseTrustProxy(' 2 '), 2);
   assert.equal(parseTrustProxy('true'), true);
   assert.equal(parseTrustProxy('false'), false);
+  assert.equal(parseTrustProxy(undefined, 1), 1);
+  assert.equal(parseTrustProxy('', 1), 1);
   assert.deepEqual(parseTrustProxy('loopback, 10.0.0.0/8'), [
     'loopback',
     '10.0.0.0/8',

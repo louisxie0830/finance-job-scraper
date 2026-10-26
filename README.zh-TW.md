@@ -63,7 +63,7 @@ GitHub Actions（`.github/workflows/ci.yml`）會在每次 push 與 pull request
 
 ## API
 
-互動式文件（Swagger UI）在 **`/docs`**，OpenAPI 3.1 規格在 `/openapi.json`。
+互動式文件（Swagger UI）在 **`/docs`**，提供英文與繁體中文兩種版本：可用頁面上方的下拉選單切換，或直接開啟 `/docs?urls.primaryName=繁體中文`。OpenAPI 3.1 規格在 `/openapi.json`（英文）與 `/openapi.zh-TW.json`（繁體中文）。
 
 | 路由                                       | 說明                                                                                     |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- |

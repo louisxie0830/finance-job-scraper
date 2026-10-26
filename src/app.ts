@@ -6,7 +6,7 @@ import cors from 'cors';
 import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import config from './config/index.ts';
-import openapi from './docs/openapi.ts';
+import { DOC_LANGUAGES, openapiByLanguage } from './docs/openapi.ts';
 import apiKey from './middleware/apiKey.ts';
 import errorHandler from './middleware/errorHandler.ts';
 import ipAllowlist from './middleware/ipAllowlist.ts';
@@ -50,14 +50,22 @@ export const createApp = (sources: Source[] = defaultSources): Express => {
 
   // Docs and health checks are cheap and public (still behind the IP allowlist).
   if (config.docsEnabled) {
-    app.get('/openapi.json', (req, res) => {
-      res.json(openapi);
-    });
+    for (const { lang, path } of DOC_LANGUAGES) {
+      app.get(path, (req, res) => {
+        res.json(openapiByLanguage[lang]);
+      });
+    }
+    // The top bar's definition dropdown switches language;
+    // /docs?urls.primaryName=繁體中文 opens the Chinese version directly.
     app.use(
       '/docs',
       swaggerUi.serve,
-      swaggerUi.setup(openapi, {
+      swaggerUi.setup(undefined, {
         customSiteTitle: 'Finance Job Scraper API',
+        explorer: true,
+        swaggerOptions: {
+          urls: DOC_LANGUAGES.map(({ name, path }) => ({ name, url: path })),
+        },
       }),
     );
   }

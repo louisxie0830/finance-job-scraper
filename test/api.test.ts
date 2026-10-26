@@ -160,6 +160,14 @@ test('docs are served', async () => {
   assert.equal(spec.openapi, '3.1.0');
   assert.ok(spec.paths['/jobs']);
 
+  const zh = (await (await fetch(`${baseUrl}/openapi.zh-TW.json`)).json()) as {
+    info: { title: string };
+    paths: Record<string, unknown>;
+  };
+  assert.equal(zh.info.title, '金融業職缺爬蟲 API');
+  // Both languages document exactly the same endpoints.
+  assert.deepEqual(Object.keys(zh.paths), Object.keys(spec.paths));
+
   const docs = await fetch(`${baseUrl}/docs/`);
   assert.equal(docs.status, 200);
   assert.match(await docs.text(), /swagger-ui/);

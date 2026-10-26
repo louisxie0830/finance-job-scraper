@@ -63,7 +63,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs type checking, lint, formatting
 
 ## API
 
-Interactive docs (Swagger UI) are served at **`/docs`**, and the OpenAPI 3.1 spec at `/openapi.json`.
+Interactive docs (Swagger UI) are served at **`/docs`** in English and Traditional Chinese; switch with the dropdown at the top, or open `/docs?urls.primaryName=繁體中文` directly. The OpenAPI 3.1 specs are at `/openapi.json` (English) and `/openapi.zh-TW.json` (繁體中文).
 
 | Route                                      | Description                                                                                                     |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
